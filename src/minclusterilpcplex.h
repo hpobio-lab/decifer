@@ -18,8 +18,10 @@ public:
   ///
   /// @param R Read matrix
   /// @param kMax Number of clusters
+  /// @param statType Summary statistic to use for clustering
   MinClusterIlpCplex(const ReadMatrix& R,
-                     int kMax);
+                     int kMax,
+                     ClusterStatisticType statType);
   
   /// Destructor
   virtual ~MinClusterIlpCplex()

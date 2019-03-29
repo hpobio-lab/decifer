@@ -31,6 +31,7 @@
 typedef std::pair<double, BoolTensor> Solution;
 
 Solution runEM(const ReadMatrix& R,
+               const Solver::ClusterStatisticType statType,
                int k,
                int nrSegments,
                int seed,
@@ -80,7 +81,7 @@ Solution runEM(const ReadMatrix& R,
         break;
       }
       
-      EMAlg em(R, k, nrSegments);
+      EMAlg em(R, k, nrSegments, statType);
       em.init();
       em.initHotStart(initY);
       g_rng.seed(seed + rr);
@@ -127,6 +128,7 @@ Solution runEM(const ReadMatrix& R,
 }
 
 Solution runCluster(const ReadMatrix& R,
+                    const Solver::ClusterStatisticType statType,
                     int k,
                     double alpha,
                     int nrThreads,
@@ -136,7 +138,7 @@ Solution runCluster(const ReadMatrix& R,
                     bool verbose,
                     int memoryLimit)
 {
-  ClusterIlpAlg solver(R, k, alpha);
+  ClusterIlpAlg solver(R, k, alpha, statType);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -161,6 +163,7 @@ Solution runCluster(const ReadMatrix& R,
 }
 
 Solution runHardCluster(const ReadMatrix& R,
+                        const Solver::ClusterStatisticType statType,
                         int k,
                         int nrSegments,
                         int nrThreads,
@@ -170,7 +173,7 @@ Solution runHardCluster(const ReadMatrix& R,
                         bool verbose,
                         int memoryLimit)
 {
-  HardClusterIlpAlg solver(R, k, nrSegments);
+  HardClusterIlpAlg solver(R, k, nrSegments, statType);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -195,6 +198,7 @@ Solution runHardCluster(const ReadMatrix& R,
 }
 
 int getNrParameters(const ReadMatrix& R,
+                    const Solver::ClusterStatisticType statType,
                     int k,
                     int method)
 {
@@ -208,7 +212,7 @@ int getNrParameters(const ReadMatrix& R,
     case 3:
     case 4:
       {
-        Solver solver(R, k, 0);
+        Solver solver(R, k, 0, statType);
         solver.init();
         
         for (int i = 0; i < R.getNrCharacters(); ++i)
@@ -225,6 +229,7 @@ int getNrParameters(const ReadMatrix& R,
 }
 
 Solution run(const ReadMatrix& R,
+             const Solver::ClusterStatisticType statType,
              int k,
              int nrSegments,
              int seed,
@@ -246,7 +251,7 @@ Solution run(const ReadMatrix& R,
     case 0:
     case 1:
     case 2:
-      return runEM(R, k,
+      return runEM(R, statType, k,
                    nrSegments, seed,
                    nrThreads, timeLimit,
                    maxIterations, nrRestarts,
@@ -256,21 +261,21 @@ Solution run(const ReadMatrix& R,
                    globalTimeLimit,
                    memoryLimit);
     case 3:
-      return runCluster(R, k, alpha,
+      return runCluster(R, statType, k, alpha,
                         nrThreads, timeLimit,
                         outputPrefix,
                         prevSolution,
                         verbose,
                         memoryLimit);
     case 4:
-      return runHardCluster(R, k,
+      return runHardCluster(R, statType, k,
                             nrSegments, nrThreads,
                             timeLimit, outputPrefix,
                             prevSolution,
                             verbose,
                             memoryLimit);
     case 5:
-      return runEM(R, k,
+      return runEM(R, statType, k,
                    nrSegments, seed,
                    nrThreads, timeLimit,
                    maxIterations, nrRestarts,
@@ -303,6 +308,7 @@ int main(int argc, char** argv)
   bool verbose = false;
   int downsampleSNVs = 25;
   int memoryLimit = -1;
+  int clusterStatistic = 2;
 
   lemon::ArgParser ap(argc, argv);
   ap.refOption("s", "Random number generator seed (default: 0)", seed)
@@ -310,6 +316,10 @@ int main(int argc, char** argv)
     .refOption("bic", "Use Bayesian Information Criterion for model selection of #clusters", bic)
     .refOption("d", "Downsample SNVs for EM initialization (default: 25)", downsampleSNVs)
     .refOption("min_k", "Specify minimum number of clusters (only used in BIC mode, default: -1 => let ILP decide)", min_k)
+    .refOption("C", "Clustering statistic:\n" \
+                    "     0 -- Single-Nucleotide Variant Frequency (SNVF)\n" \
+                    "     1 -- Cancer Cell Fraction (CCF)\n" \
+                    "     2 -- Descendant Cell Fraction (DCF, default)", clusterStatistic)
     .refOption("m", "Clustering method:\n" \
                     "     0 -- Expectation-Maximization using copy-neutral SNV k-Means initialization\n" \
                     "     1 -- Expectation-Maximization using hard clustering with confidence intervals\n" \
@@ -329,6 +339,14 @@ int main(int argc, char** argv)
     .refOption("ML", "Memory limit", memoryLimit)
     .other("filename");
   ap.parse();
+  
+  if (!(0 <= clusterStatistic && clusterStatistic < 3))
+  {
+    std::cerr << "Error: invalid clustering statistic specified" << std::endl;
+    return 1;
+  }
+  
+  Solver::ClusterStatisticType statType = static_cast<Solver::ClusterStatisticType>(clusterStatistic);
   
   g_rng = std::mt19937(seed);
   
@@ -365,7 +383,7 @@ int main(int argc, char** argv)
     int minK = 0;
     if (min_k == -1)
     {
-      MinClusterIlpAlg minCluster(R, k);
+      MinClusterIlpAlg minCluster(R, k, Solver::CLUSTER_DCF);
       minCluster.init();
       minCluster.solve(nrThreads, timeLimit);
       minK = minCluster.getMinK();
@@ -383,7 +401,7 @@ int main(int argc, char** argv)
     int localTimeLimit = globalTimeLimit == -1 ? -1 : globalTimeLimit / (k - minK + 1);
     for (int kk = minK; kk <= k; ++kk)
     {
-      Solution sol = run(R, kk, nrSegments,
+      Solution sol = run(R, statType, kk, nrSegments,
                          seed, nrThreads,
                          timeLimit, maxIterations,
                          nrRestarts, outputPrefix,
@@ -391,7 +409,7 @@ int main(int argc, char** argv)
                          downsampleSNVs, localTimeLimit,
                          memoryLimit);
       initY = sol.second;
-      int nrParameters = getNrParameters(R, kk, method);
+      int nrParameters = getNrParameters(R, statType, kk, method);
       double b = log(nrObservations) * nrParameters - 2 * sol.first;
       std::cerr << "k = " << kk << " -- Log likelihood " << sol.first << " -- BIC " << b << std::endl;
       outBIC << kk << "\t" << sol.first << "\t" << nrObservations << "\t" << nrParameters << "\t" << b << std::endl;
@@ -400,7 +418,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    Solution sol = run(R, k, nrSegments,
+    Solution sol = run(R, statType, k, nrSegments,
                        seed, nrThreads,
                        timeLimit, maxIterations,
                        nrRestarts, outputPrefix,

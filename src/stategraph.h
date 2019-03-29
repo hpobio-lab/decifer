@@ -207,6 +207,10 @@ public:
   static const StateEdgeSetSet& getStateTrees(const IntPairSet& L,
                                               int xy_max_c);
   
+  static void writeStateTrees(std::ostream& out);
+  
+  static void readStateTrees(std::istream& in);
+  
   static void partition(const StateEdgeSet& S,
                         const CnaTriple& vertex,
                         bool& preMutationFlag,
@@ -239,11 +243,19 @@ public:
     }
   }
   
-private:
+public:
   typedef std::map<IntPairSet, StateEdgeSetSet> Dictionary;
+  
+private:
   static Dictionary _dict;
 };
   
 bool operator<(const StateGraph::CnaTriple& lhs, const StateGraph::CnaTriple& rhs);
+
+std::ostream& operator<<(std::ostream& out,
+                         const StateGraph::Dictionary& dict);
+
+std::istream& operator>>(std::istream& in,
+                         StateGraph::Dictionary& dict);
 
 #endif // STATEGRAPH_H

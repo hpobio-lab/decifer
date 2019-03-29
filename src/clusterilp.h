@@ -17,16 +17,31 @@
 class ClusterIlp : public Solver
 {
 public:
+  /// Constructor
+  ///
+  /// @param R Read matrix
+  /// @param k Number of clusters
+  /// @param alpha Confidence interval width
+  /// @param statType Summary statistic to use for clustering
   ClusterIlp(const ReadMatrix& R,
              int k,
-             double alpha);
+             double alpha,
+             ClusterStatisticType statType);
   
+  /// Get VAF lower bound
+  ///
+  /// @param p Sample
+  /// @param i character
   double getVAFlb(int p,
                   int i) const
   {
     return _vafLB[i][p];
   }
   
+  /// Get VAF upper bound
+  ///
+  /// @param p Sample
+  /// @param i character
   double getVAFub(int p,
                   int i) const
   {

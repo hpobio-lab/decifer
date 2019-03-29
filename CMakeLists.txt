@@ -1,6 +1,10 @@
 cmake_minimum_required( VERSION 2.8 )
 
-project( DECIFER )
+if (CPLEX)
+  project( DECIFER-CPLEX )
+else()
+  project( DECIFER-GUROBI )
+endif()
 
 set( CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR} ${CMAKE_MODULE_PATH} )
 
@@ -143,6 +147,23 @@ set( visualizestatetree_src
 set( visualizestatetree_hdr
   src/utils.h
   src/statetree.h
+)
+
+set( generatestatetrees_src
+  src/generatestatetreesmain.cpp
+  src/statetree.cpp
+  src/stategraph.cpp
+  src/utils.cpp
+  src/readmatrix.cpp
+  src/basematrix.cpp
+)
+
+set( generatestatetrees_hdr
+  src/statetree.h
+  src/stategraph.h
+  src/utils.h
+  src/readmatrix.h
+  src/basematrix.h
 )
 
 if (CPLEX)
@@ -413,6 +434,9 @@ target_link_libraries( visualizepoststatetree ${CommonLibs} )
 
 add_executable( generate EXCLUDE_FROM_ALL ${generate_src} ${generate_hdr} )
 target_link_libraries( generate ${CommonLibs} )
+
+add_executable( generatestatetrees ${generatestatetrees_src} ${generatestatetrees_hdr} )
+target_link_libraries( generatestatetrees ${CommonLibs} )
 
 add_executable( ccf EXCLUDE_FROM_ALL ${ccf_src} ${ccf_hdr} )
 target_link_libraries( ccf ${CommonLibs} )

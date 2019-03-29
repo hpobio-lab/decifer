@@ -10,8 +10,9 @@
 
 ClusterIlp::ClusterIlp(const ReadMatrix& R,
                        int k,
-                       double alpha)
-  : Solver(R, k, 0)
+                       double alpha,
+                       ClusterStatisticType statType)
+  : Solver(R, k, 0, statType)
   , _alpha(alpha)
   , _vafLB()
   , _vafUB()
@@ -267,15 +268,36 @@ void ClusterIlp::initStateTrees()
           _dcfUB[i].back()[p] = S_it_ub.dcf(p);
           if (_vafLB[i][p] <= h_ip && h_ip <= _vafUB[i][p])
           {
-            _dcfExp[i].back()[p] = S_it_exp.dcf(p);
+            if (_statType == CLUSTER_CCF)
+            {
+              _dcfExp[i].back()[p] = S_it_exp.cf(p);
+            }
+            else
+            {
+              _dcfExp[i].back()[p] = S_it_exp.dcf(p);
+            }
           }
           else if (h_ip < _vafLB[i][p])
           {
-            _dcfExp[i].back()[p] = S_it_lb.dcf(p);
+            if (_statType == CLUSTER_CCF)
+            {
+              _dcfExp[i].back()[p] = S_it_lb.cf(p);
+            }
+            else
+            {
+              _dcfExp[i].back()[p] = S_it_lb.dcf(p);
+            }
           }
           else
           {
-            _dcfExp[i].back()[p] = S_it_ub.dcf(p);
+            if (_statType == CLUSTER_CCF)
+            {
+              _dcfExp[i].back()[p] = S_it_ub.cf(p);
+            }
+            else
+            {
+              _dcfExp[i].back()[p] = S_it_ub.dcf(p);
+            }
           }
         }
       }

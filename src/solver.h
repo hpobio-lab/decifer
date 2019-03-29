@@ -16,14 +16,23 @@
 class Solver
 {
 public:
+  enum ClusterStatisticType
+  {
+//    CLUSTER_SNVF,
+    CLUSTER_CCF,
+    CLUSTER_DCF
+  };
+  
   /// Constructor
   ///
   /// @param R Read matrix
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
+  /// @param statType Summary statistic to use for clustering
   Solver(const ReadMatrix& R,
          int k,
-         int nrSegments);
+         int nrSegments,
+         ClusterStatisticType statType);
   
   /// Destructor
   virtual ~Solver()
@@ -187,6 +196,8 @@ protected:
   const int _k;
   /// Number of segments for piecewise linear approximation
   const int _nrSegments;
+  /// Summary statistic to use for clustering
+  const ClusterStatisticType _statType;
   /// Log factorial look-up table
   DoubleVector _logFactorial;
   /// State trees \f$\mathcal{T}(\mu_i)\f$

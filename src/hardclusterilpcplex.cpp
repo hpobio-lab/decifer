@@ -9,8 +9,9 @@
 
 HardClusterIlpCplex::HardClusterIlpCplex(const ReadMatrix& R,
                                          int k,
-                                         int nrSegments)
-  : HardClusterIlp(R, k, nrSegments)
+                                         int nrSegments,
+                                         ClusterStatisticType statType)
+  : HardClusterIlp(R, k, nrSegments, statType)
   , _env()
   , _model(_env)
   , _cplex(_model)

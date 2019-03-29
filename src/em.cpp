@@ -14,8 +14,9 @@
 
 EM::EM(const ReadMatrix& R,
        int k,
-       int nrSegments)
-  : Solver(R, k, nrSegments)
+       int nrSegments,
+       ClusterStatisticType statType)
+  : Solver(R, k, nrSegments, statType)
   , _gamma(R.getNrCharacters())
   , _solT()
   , _initY()

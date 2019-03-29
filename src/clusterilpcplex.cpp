@@ -10,8 +10,9 @@
 
 ClusterIlpCplex::ClusterIlpCplex(const ReadMatrix& R,
                                  int k,
-                                 double alpha)
-  : ClusterIlp(R, k, alpha)
+                                 double alpha,
+                                 ClusterStatisticType statType)
+  : ClusterIlp(R, k, alpha, statType)
   , _env()
   , _model(_env)
   , _cplex(_model)

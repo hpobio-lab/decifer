@@ -8,8 +8,9 @@
 #include "minclusterilp.h"
 
 MinClusterIlp::MinClusterIlp(const ReadMatrix& R,
-                             int kMax)
-  : Solver(R, kMax, 0)
+                             int kMax,
+                             ClusterStatisticType statType)
+  : Solver(R, kMax, 0, statType)
   , _solMinK(0)
 {
 }

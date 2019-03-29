@@ -22,9 +22,11 @@ public:
   /// @param R Read matrix
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
+  /// @param statType Summary statistic to use for clustering
   HardClusterIlp(const ReadMatrix& R,
                  int k,
-                 int nrSegments);
+                 int nrSegments,
+                 ClusterStatisticType statType);
   
   /// Destructor
   virtual ~HardClusterIlp()

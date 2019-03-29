@@ -9,8 +9,9 @@
 
 HardClusterIlp::HardClusterIlp(const ReadMatrix& R,
                                int k,
-                               int nrSegments)
-  : Solver(R, k, nrSegments)
+                               int nrSegments,
+                               ClusterStatisticType statType)
+  : Solver(R, k, nrSegments, statType)
   , _hatN()
   , _z()
   , _solT()

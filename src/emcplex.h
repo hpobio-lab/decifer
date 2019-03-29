@@ -21,9 +21,11 @@ public:
   /// @param R Read matrix
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
+  /// @param statType Summary statistic to use for clustering
   EMCplex(const ReadMatrix& R,
           int k,
-          int nrSegments);
+          int nrSegments,
+          ClusterStatisticType statType);
   
   virtual ~EMCplex()
   {
@@ -37,13 +39,19 @@ protected:
   
   virtual std::unique_ptr<HardClusterIlp> createHardClusterIlpSolver(const ReadMatrix& R)
   {
-    return std::unique_ptr<HardClusterIlp>(new HardClusterIlpCplex(R, _k, _nrSegments));
+    return std::unique_ptr<HardClusterIlp>(new HardClusterIlpCplex(R,
+                                                                   _k,
+                                                                   _nrSegments,
+                                                                   _statType));
   }
   
   virtual std::unique_ptr<ClusterIlp> createClusterIlpSolver(const ReadMatrix& R,
                                                              double alpha)
   {
-    return std::unique_ptr<ClusterIlp>(new ClusterIlpCplex(R, _k, alpha));
+    return std::unique_ptr<ClusterIlp>(new ClusterIlpCplex(R,
+                                                           _k,
+                                                           alpha,
+                                                           _statType));
   }
   
   typedef IloArray<IloNumVarArray> IloNumVarMatrix;

@@ -11,10 +11,12 @@
 
 Solver::Solver(const ReadMatrix& R,
                int k,
-               int nrSegments)
+               int nrSegments,
+               ClusterStatisticType statType)
   : _R(R)
   , _k(k)
   , _nrSegments(nrSegments)
+  , _statType(statType)
   , _logFactorial(1, 0)
   , _scriptT(R.getNrCharacters())
   , _x()
@@ -376,7 +378,17 @@ void Solver::init(int i)
       {
         if (xyz == mutationVertex) continue;
         _numerator[i][t][p] += (1 - xyz._z) * _R.getMu(p, i, xyz._x, xyz._y);
-        _dLB[i][t][p] += _R.getMu(p, i, xyz._x, xyz._y);
+        switch (_statType)
+        {
+          case CLUSTER_DCF:
+            _dLB[i][t][p] += _R.getMu(p, i, xyz._x, xyz._y);
+            break;
+          case CLUSTER_CCF:
+            if (xyz._z > 0)
+              _dLB[i][t][p] += _R.getMu(p, i, xyz._x, xyz._y);
+            break;
+        }
+        
       }
       _dUB[i][t][p] = _dLB[i][t][p] + _R.getMu(p, i, mutationVertex._x, mutationVertex._y);
       if (!g_tol.different(_dLB[i][t][p], _dUB[i][t][p]))
@@ -483,8 +495,11 @@ double Solver::updateLogLikelihood()
   _logLikelihood = 0;
   for (int i = 0; i < n; ++i)
   {
-    _logLikelihood += getLogLikelihood(i);
+    double L_i = getLogLikelihood(i);
+    _logLikelihood += L_i;
+    std::cout << i << ": " << L_i << std::endl;
   }
+  std::cout << std::endl;
   
   return _logLikelihood - oldLogLikelihood;
 }

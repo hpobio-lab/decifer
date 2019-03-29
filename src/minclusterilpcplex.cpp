@@ -8,8 +8,9 @@
 #include "minclusterilpcplex.h"
 
 MinClusterIlpCplex::MinClusterIlpCplex(const ReadMatrix& R,
-                                       int kMax)
-  : MinClusterIlp(R, kMax)
+                                       int kMax,
+                                       ClusterStatisticType statType)
+  : MinClusterIlp(R, kMax, statType)
   , _env()
   , _model(_env)
   , _cplex(_model)

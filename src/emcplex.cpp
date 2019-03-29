@@ -9,8 +9,9 @@
 
 EMCplex::EMCplex(const ReadMatrix& R,
                  int k,
-                 int nrSegments)
-  : EM(R, k, nrSegments)
+                 int nrSegments,
+                 ClusterStatisticType statType)
+  : EM(R, k, nrSegments, statType)
   , _env()
   , _model(_env)
   , _cplex(_model)

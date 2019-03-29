@@ -14,12 +14,15 @@ const StateGraph::StateEdgeSetSet& StateGraph::getStateTrees(const IntPairSet& L
                                                              int maxCopyNumber)
 {
   StateGraph G(maxCopyNumber);
+//  G.writeDOT(std::cout);
   
   if (_dict.find(L) == _dict.end())
   {
     G.enumerate(L);
     _dict[L] = G._result;
   }
+  
+//  std::cout << _dict << std::endl;
   
   return _dict[L];
 }
@@ -47,26 +50,26 @@ void StateGraph::init()
   // vertices
   for (int x = 0; x <= _maxCopyNumber; ++x)
   {
-    for (int y = 0; y <= x; ++y)
+    for (int y = 0; y <= _maxCopyNumber; ++y)
     {
-      for (int z = 0; z <= x; ++z)
+      for (int xbar = 0; xbar <= x; ++xbar)
       {
-        Node v_xyz0 = _G.addNode();
-        _toNode[x][y][z][0] = v_xyz0;
-        _x[v_xyz0] = x;
-        _y[v_xyz0] = y;
-        _xbar[v_xyz0] = z;
-        _ybar[v_xyz0] = 0;
-        
-        if (0 < z && z <= y)
-        {
-          Node v_xy0z = _G.addNode();
-          _toNode[x][y][0][z] = v_xy0z;
-          _x[v_xy0z] = x;
-          _y[v_xy0z] = y;
-          _xbar[v_xy0z] = 0;
-          _ybar[v_xy0z] = z;
-        }
+        Node v_xy_xbar0 = _G.addNode();
+        _toNode[x][y][xbar][0] = v_xy_xbar0;
+        _x[v_xy_xbar0] = x;
+        _y[v_xy_xbar0] = y;
+        _xbar[v_xy_xbar0] = xbar;
+        _ybar[v_xy_xbar0] = 0;
+      }
+      
+      for (int ybar = 1; ybar <= y; ++ybar)
+      {
+        Node v_xy_0ybar = _G.addNode();
+        _toNode[x][y][0][ybar] = v_xy_0ybar;
+        _x[v_xy_0ybar] = x;
+        _y[v_xy_0ybar] = y;
+        _xbar[v_xy_0ybar] = 0;
+        _ybar[v_xy_0ybar] = ybar;
       }
     }
   }
@@ -99,28 +102,28 @@ void StateGraph::init()
     {
       addEdge(v, AMPLIFICATION, x+1, y, xbar+1, ybar);
     }
-    if (0 < y && y < x && ybar < y)
+    if (0 < y && y < _maxCopyNumber && ybar < y)
     {
       addEdge(v, AMPLIFICATION, x, y+1, xbar, ybar);
     }
-    if (0 < y && y < x && ybar > 0)
+    if (0 < y && y < _maxCopyNumber && ybar > 0)
     {
       addEdge(v, AMPLIFICATION, x, y+1, xbar, ybar+1);
     }
-    if (x == y && xbar != ybar && 0 < y && ybar < y && y < _maxCopyNumber)
-    {
-      addEdge(v, AMPLIFICATION, y+1, x, ybar, xbar);
-    }
-    if (x == y && xbar != ybar && 0 < y && ybar > 0 && y < _maxCopyNumber)
-    {
-      addEdge(v, AMPLIFICATION, y+1, x, ybar+1, xbar);
-    }
+//    if (x == y && xbar != ybar && 0 < y && ybar < y && y < _maxCopyNumber)
+//    {
+//      addEdge(v, AMPLIFICATION, y+1, x, ybar, xbar);
+//    }
+//    if (x == y && xbar != ybar && 0 < y && ybar > 0 && y < _maxCopyNumber)
+//    {
+//      addEdge(v, AMPLIFICATION, y+1, x, ybar+1, xbar);
+//    }
     // deletion edges
-    if (x > xbar && x > y)
+    if (x > xbar)
     {
       addEdge(v, DELETION, x-1, y, xbar, ybar);
     }
-    if (xbar > 0 && x > y)
+    if (xbar > 0)
     {
       addEdge(v, DELETION, x-1, y, xbar-1, ybar);
     }
@@ -132,14 +135,14 @@ void StateGraph::init()
     {
       addEdge(v, DELETION, x, y-1, xbar, ybar-1);
     }
-    if (x == y && xbar != ybar && x > xbar)
-    {
-      addEdge(v, DELETION, y, x-1, ybar, xbar);
-    }
-    if (x == y && xbar != ybar && xbar > 0)
-    {
-      addEdge(v, DELETION, y, x-1, ybar, xbar-1);
-    }
+//    if (x == y && xbar != ybar && x > xbar)
+//    {
+//      addEdge(v, DELETION, y, x-1, ybar, xbar);
+//    }
+//    if (x == y && xbar != ybar && xbar > 0)
+//    {
+//      addEdge(v, DELETION, y, x-1, ybar, xbar-1);
+//    }
   }
 }
   
@@ -616,4 +619,143 @@ void StateGraph::partition(const StateEdgeSet& S,
 bool operator<(const StateGraph::CnaTriple& lhs, const StateGraph::CnaTriple& rhs)
 {
   return lhs._x < rhs._x || (lhs._x == rhs._x && lhs._y < rhs._y) || (lhs._x == rhs._x && lhs._y == rhs._y && lhs._z < rhs._z);
+}
+
+std::istream& operator>>(std::istream& in,
+                         StateGraph::Dictionary& dict)
+{
+  std::string line;
+  getline(in, line);
+  std::stringstream ss(line);
+  
+  StateGraph::Dictionary newDict;
+
+  int nrCopyNumberStates = -1;
+  ss >> nrCopyNumberStates;
+  if (nrCopyNumberStates < 0)
+  {
+    throw std::runtime_error("Error: invalid number of copy number states");
+  }
+  
+  for (int i = 0; i < nrCopyNumberStates; ++i)
+  {
+    IntPairSet L;
+    StringVector s;
+    
+    getline(in, line);
+    boost::split(s, line, boost::is_any_of(" "));
+    
+    for (const std::string& xy_str : s)
+    {
+      int x = -1;
+      int y = -1;
+      if (sscanf(xy_str.c_str(), "%d,%d", &x, &y) != 2 || x < 0 || y < 0)
+      {
+        throw std::runtime_error("Error: invalid copy number '" + xy_str + "'");
+      }
+      L.insert(IntPair(x, y));
+    }
+    
+    if (newDict.count(L) > 0)
+    {
+      throw std::runtime_error("Error: copy number states '" + line + "' already present");
+    }
+    
+    int nrStateTrees = -1;
+    getline(in, line);
+    ss.str(line);
+    ss >> nrStateTrees;
+    if (nrStateTrees < 0)
+    {
+      throw std::runtime_error("Error: invalid number of state trees");
+    }
+    
+    for (int j = 0; j < nrStateTrees; ++j)
+    {
+      getline(in, line);
+      boost::split(s, line, boost::is_any_of(" "));
+      
+      StateGraph::CnaTripleVector xyzVector;
+      for (const std::string& xyz_str : s)
+      {
+        int x = -1;
+        int y = -1;
+        int z = -1;
+        if (sscanf(xyz_str.c_str(), "%d,%d,%d", &x, &y, &z) != 3 || x < 0 || y < 0 || z < 0)
+        {
+          throw std::runtime_error("Error: invalid copy number '" + xyz_str + "'");
+        }
+        xyzVector.push_back(StateGraph::CnaTriple(x, y, z));
+      }
+      
+      if (xyzVector.size() % 2 != 0)
+      {
+        throw std::runtime_error("Error: odd number of xyz triples '" + line + "'");
+      }
+      
+      StateGraph::StateEdgeSet stateTree;
+      for (int jj = 0; xyzVector.size() / 2; ++jj)
+      {
+        stateTree.insert(StateGraph::StateEdge(xyzVector[2*jj], xyzVector[2*jj + 1]));
+      }
+      
+      if (newDict[L].count(stateTree) > 0)
+      {
+        throw std::runtime_error("Error: duplicate state tree '" + line + "'");
+      }
+      newDict[L].insert(stateTree);
+    }
+  }
+  
+  dict = newDict;
+  
+  return in;
+}
+
+std::ostream& operator<<(std::ostream& out,
+                         const StateGraph::Dictionary& dict)
+{
+  out << dict.size() << " #copynumber_states" << std::endl;
+  for (const auto& kv : dict)
+  {
+    bool first = true;
+    for (const IntPair& xy : kv.first)
+    {
+      if (first)
+        first = false;
+      else
+        out << " ";
+      out << xy.first << "," << xy.second;
+    }
+    out << std::endl;
+    
+    out << kv.second.size() << " #state_trees" << std::endl;
+    for (const StateGraph::StateEdgeSet& S : kv.second)
+    {
+      first = true;
+      for (const StateGraph::StateEdge& edge : S)
+      {
+        if (first)
+          first = false;
+        else
+          out << " ";
+        
+        out << edge.first._x << "," << edge.first._y << "," << edge.first._z << " ";
+        out << edge.second._x << "," << edge.second._y << "," << edge.second._z;
+      }
+      out << std::endl;
+    }
+  }
+  
+  return out;
+}
+
+void StateGraph::writeStateTrees(std::ostream& out)
+{
+  out << _dict;
+}
+
+void StateGraph::readStateTrees(std::istream& in)
+{
+  in >> _dict;
 }

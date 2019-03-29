@@ -15,9 +15,16 @@
 class ClusterIlpCplex : public ClusterIlp
 {
 public:
+  /// Constructor
+  ///
+  /// @param R Read matrix
+  /// @param k Number of clusters
+  /// @param alpha Confidence interval width
+  /// @param statType Summary statistic to use for clustering
   ClusterIlpCplex(const ReadMatrix& R,
                   int k,
-                  double alpha);
+                  double alpha,
+                  ClusterStatisticType statType);
   
   /// Export ILP
   ///
@@ -43,13 +50,16 @@ public:
   /// @param y Clustering and state tree assignment
   void initHotStart(const BoolTensor& y);
   
+  /// Destructor
   virtual ~ClusterIlpCplex()
   {
     _env.end();
   }
   
 protected:
+  /// Initialize variables
   virtual void initVariables();
+  /// Initialize constraints
   virtual void initConstraints();
   
 private:
