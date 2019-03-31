@@ -396,7 +396,14 @@ void EM::writeMutationProperties(std::ostream& out) const
   
   for (int p = 0; p < m; ++p)
   {
-    out << "\tdcf" << p;
+    if (_statType == CLUSTER_DCF)
+    {
+      out << "\tdcf" << p;
+    }
+    else
+    {
+      out << "\tccf" << p;
+    }
   }
   out << std::endl;
   
