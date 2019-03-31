@@ -377,15 +377,19 @@ void Solver::init(int i)
       for (const auto& xyz : verticesPostMut)
       {
         if (xyz == mutationVertex) continue;
-        _numerator[i][t][p] += (1 - xyz._z) * _R.getMu(p, i, xyz._x, xyz._y);
+        
         switch (_statType)
         {
           case CLUSTER_DCF:
             _dLB[i][t][p] += _R.getMu(p, i, xyz._x, xyz._y);
+            _numerator[i][t][p] += (1 - xyz._z) * _R.getMu(p, i, xyz._x, xyz._y);
             break;
           case CLUSTER_CCF:
             if (xyz._z > 0)
+            {
               _dLB[i][t][p] += _R.getMu(p, i, xyz._x, xyz._y);
+              _numerator[i][t][p] += (1 - xyz._z) * _R.getMu(p, i, xyz._x, xyz._y);
+            }
             break;
         }
         
@@ -497,9 +501,9 @@ double Solver::updateLogLikelihood()
   {
     double L_i = getLogLikelihood(i);
     _logLikelihood += L_i;
-    std::cout << i << ": " << L_i << std::endl;
+//    std::cout << i << ": " << L_i << std::endl;
   }
-  std::cout << std::endl;
+//  std::cout << std::endl;
   
   return _logLikelihood - oldLogLikelihood;
 }
@@ -514,7 +518,7 @@ bool Solver::isFeasible(const double f_pj,
                  DoubleMatrix(maxCopyNumber + 1,
                               DoubleVector(maxCopyNumber + 1, 0)));
   
-  // 2a. get vertices of S
+  // 2a. get vertices of state tree
   StateGraph::CnaTripleSet vertices;
   vertices.insert(StateGraph::CnaTriple(1,1,0));
   
@@ -536,6 +540,7 @@ bool Solver::isFeasible(const double f_pj,
   StateGraph::CnaTriple mutationVertex;
   StateGraph::partition(T_it, verticesPreMutS, verticesPostMutS, mutationVertex);
   
+  // 2b. compute mass pre mutation, and mass post mut
   double massPreMut = 0, massPostMut = 0, massMut = 0;
   for (const ReadMatrix::CopyNumberState& cnState : cnStates)
   {
@@ -555,12 +560,16 @@ bool Solver::isFeasible(const double f_pj,
         {
           if (verticesPostMutS.count(xyz) == 1)
           {
-            massPostMut += cnState._mu;
+            if (_statType == CLUSTER_DCF || xyz._z > 0)
+            {
+              massPostMut += cnState._mu;
+            }
             s[xyz._x][xyz._y][xyz._z] = massPostMut;
           }
           else
           {
             assert(verticesPreMutS.count(xyz) == 1);
+            assert(xyz._z == 0);
             massPreMut += cnState._mu;
             s[xyz._x][xyz._y][xyz._z] = massPreMut;
           }

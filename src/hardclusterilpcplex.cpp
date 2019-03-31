@@ -316,6 +316,9 @@ void HardClusterIlpCplex::initObjective()
             sum += _hatG[i][t][j][p][l] * _lambda[i][t][j][p][l];
           }
         }
+        
+        sum += -_y[i][t][j] * log(n);
+        sum += -_y[i][t][j] * log(_scriptT[i].size());
       }
     }
   }
@@ -363,6 +366,9 @@ bool HardClusterIlpCplex::solve(int nrThreads,
     return false;
   }
   
+  std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
+  std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+  
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
   for (int j = 0; j < _k; ++j)
   {
@@ -387,6 +393,25 @@ bool HardClusterIlpCplex::solve(int nrThreads,
         _solY[i][t][j] = (_cplex.getValue(_y[i][t][j]) >= 0.4);
         if (_solY[i][t][j])
         {
+          double sum = 0;
+          for (int l = 0; l < _nrSegments; ++l)
+          {
+            sum += _hatN[l] * _cplex.getValue(_gamma[i][t][j][l]);
+          }
+          
+          for (int p = 0; p < m; ++p)
+          {
+            for (int l = 0; l < _nrSegments; ++l)
+            {
+              sum += _hatG[i][t][j][p][l] * _cplex.getValue(_lambda[i][t][j][p][l]);
+            }
+          }
+          
+          sum += -log(n);
+          sum += -log(_scriptT[i].size());
+          
+          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
+          
           _solT.emplace_back(convertToStateTreeFromDCF(_scriptT[i][t],
                                                        _solD[j], i));
           _solZ.push_back(j);

@@ -300,11 +300,11 @@ std::istream& operator>>(std::istream& in,
       cnState._y = boost::lexical_cast<int>(s[offset + 3*i + 1]);
       cnState._mu = boost::lexical_cast<double>(s[offset + 3*i + 2]);
         
-//      if (cnState._x < cnState._y)
-//      {
-//          throw std::runtime_error("Error: Found unsorted copy-number state (" + std::to_string(cnState._x) + ", " + std::to_string(cnState._y)
-//                                   + "); copy-number state must be ordered s.t. first copy number should always be the higher");
-//      }
+      if (cnState._x < cnState._y)
+      {
+        throw std::runtime_error("Error: Found unsorted copy-number state (" + std::to_string(cnState._x) + ", " + std::to_string(cnState._y)
+                                 + "); copy-number state must be ordered s.t. first copy number should always be the higher");
+      }
       
       if (cnState._x > max_x) max_x = cnState._x;
       if (cnState._y > max_y) max_y = cnState._y;

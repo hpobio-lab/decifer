@@ -308,7 +308,8 @@ int main(int argc, char** argv)
   bool verbose = false;
   int downsampleSNVs = 25;
   int memoryLimit = -1;
-  int clusterStatistic = 2;
+  int clusterStatistic = 1;
+  std::string stateTreeFilename;
 
   lemon::ArgParser ap(argc, argv);
   ap.refOption("s", "Random number generator seed (default: 0)", seed)
@@ -317,9 +318,8 @@ int main(int argc, char** argv)
     .refOption("d", "Downsample SNVs for EM initialization (default: 25)", downsampleSNVs)
     .refOption("min_k", "Specify minimum number of clusters (only used in BIC mode, default: -1 => let ILP decide)", min_k)
     .refOption("C", "Clustering statistic:\n" \
-                    "     0 -- Single-Nucleotide Variant Frequency (SNVF)\n" \
-                    "     1 -- Cancer Cell Fraction (CCF)\n" \
-                    "     2 -- Descendant Cell Fraction (DCF, default)", clusterStatistic)
+                    "     0 -- Cancer Cell Fraction (CCF)\n" \
+                    "     1 -- Descendant Cell Fraction (DCF, default)", clusterStatistic)
     .refOption("m", "Clustering method:\n" \
                     "     0 -- Expectation-Maximization using copy-neutral SNV k-Means initialization\n" \
                     "     1 -- Expectation-Maximization using hard clustering with confidence intervals\n" \
@@ -337,10 +337,11 @@ int main(int argc, char** argv)
     .refOption("o", "Output prefix (default: './output')", outputPrefix)
     .refOption("v", "Verbose (default: 0)", verbose, false)
     .refOption("ML", "Memory limit", memoryLimit)
+    .refOption("S", "State tree file", stateTreeFilename, false)
     .other("filename");
   ap.parse();
   
-  if (!(0 <= clusterStatistic && clusterStatistic < 3))
+  if (!(0 <= clusterStatistic && clusterStatistic < 2))
   {
     std::cerr << "Error: invalid clustering statistic specified" << std::endl;
     return 1;
@@ -374,6 +375,18 @@ int main(int argc, char** argv)
     return 1;
   }
   inR.close();
+  
+  if (!stateTreeFilename.empty())
+  {
+    std::ifstream inS(stateTreeFilename);
+    if (!inS.good())
+    {
+      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading" << std::endl;
+      return 1;
+    }
+    
+    StateGraph::readStateTrees(inS);
+  }
   
   if (bic)
   {

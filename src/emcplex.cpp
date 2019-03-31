@@ -108,6 +108,15 @@ void EMCplex::initPWLA()
     }
   }
   
+  // TODO: REMOVE_ME
+//  for (int j = 0; j < _k; ++j)
+//  {
+//    for (int p = 0; p < m; ++p)
+//    {
+//      _model.add(_fGRB[j][p] == _solD[j][p]);
+//    }
+//  }
+  
   IloExpr obj(_env);
   for (int i = 0; i < n; ++i)
   {
@@ -137,26 +146,26 @@ void EMCplex::initPWLA()
   sum2.end();
 }
 
-bool EMCplex::stepM(int nrThreads)
+bool EMCplex::stepM(int nrThreads,
+                    bool verbose)
 {
   initPWLA();
   if (nrThreads > 0)
   {
     _cplex.setParam(IloCplex::Threads, nrThreads);
   }
-  _cplex.setOut(_env.getNullStream());
-  _cplex.setError(_env.getNullStream());
-  _cplex.setWarning(_env.getNullStream());
-
+  
+  if (!verbose)
+  {
+    _cplex.setOut(_env.getNullStream());
+    _cplex.setError(_env.getNullStream());
+    _cplex.setWarning(_env.getNullStream());
+  }
+  
+//  _cplex.exportModel("/tmp/infeasible.lp");
   _cplex.solve();
   if (_cplex.getStatus() == IloAlgorithm::Infeasible)
   {
-    //    try {
-    //        _pModel->computeIIS();
-    //    } catch (GRBException e) {
-    //        std::cout << e.getMessage() << std::endl;
-    //    }
-    //    _pModel->write("/tmp/error.ilp");
     return false;
   }
   

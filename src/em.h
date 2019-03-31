@@ -98,7 +98,8 @@ protected:
   virtual void stepE();
   
   /// M step
-  virtual bool stepM(int nrThreads) = 0;
+  virtual bool stepM(int nrThreads,
+                     bool verbose) = 0;
   
   /// Initialize piecewise linear approximation
   virtual void initPWLA();

@@ -310,7 +310,7 @@ bool EM::solve(int seed,
   while (true)
   {
     stepE();
-    if (!stepM(nrThreads))
+    if (!stepM(nrThreads, verbose))
     {
       std::cerr << "Iteration = " << ++step << " -- infeasible solution! " << " -- " << timer.realTime() << " s" << std::endl;
       return false;

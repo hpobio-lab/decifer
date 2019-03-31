@@ -35,7 +35,8 @@ public:
 protected:
   void initPWLA();
   
-  bool stepM(int nrThreads);
+  bool stepM(int nrThreads,
+             bool verbose);
   
   virtual std::unique_ptr<HardClusterIlp> createHardClusterIlpSolver(const ReadMatrix& R)
   {
