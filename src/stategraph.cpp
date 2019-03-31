@@ -725,6 +725,7 @@ bool operator<(const StateGraph::CnaTriple& lhs, const StateGraph::CnaTriple& rh
 std::istream& operator>>(std::istream& in,
                          StateGraph::Dictionary& dict)
 {
+  g_lineNumber = 0;
   std::string line;
   getline(in, line);
   std::stringstream ss(line);
@@ -735,7 +736,7 @@ std::istream& operator>>(std::istream& in,
   ss >> nrCopyNumberStates;
   if (nrCopyNumberStates < 0)
   {
-    throw std::runtime_error("Error: invalid number of copy number states");
+    throw std::runtime_error(getLineNumber() + "Error: invalid number of copy number states");
   }
   
   for (int i = 0; i < nrCopyNumberStates; ++i)
@@ -752,14 +753,14 @@ std::istream& operator>>(std::istream& in,
       int y = -1;
       if (sscanf(xy_str.c_str(), "%d,%d", &x, &y) != 2 || x < 0 || y < 0)
       {
-        throw std::runtime_error("Error: invalid copy number '" + xy_str + "'");
+        throw std::runtime_error(getLineNumber() + "Error: invalid copy number '" + xy_str + "'");
       }
       L.insert(IntPair(x, y));
     }
     
     if (newDict.count(L) > 0)
     {
-      throw std::runtime_error("Error: copy number states '" + line + "' already present");
+      throw std::runtime_error(getLineNumber() + "Error: copy number states '" + line + "' already present");
     }
     
     int nrStateTrees = -1;
@@ -768,7 +769,7 @@ std::istream& operator>>(std::istream& in,
     ss >> nrStateTrees;
     if (nrStateTrees < 0)
     {
-      throw std::runtime_error("Error: invalid number of state trees");
+      throw std::runtime_error(getLineNumber() + "Error: invalid number of state trees");
     }
     
     for (int j = 0; j < nrStateTrees; ++j)
@@ -784,14 +785,14 @@ std::istream& operator>>(std::istream& in,
         int z = -1;
         if (sscanf(xyz_str.c_str(), "%d,%d,%d", &x, &y, &z) != 3 || x < 0 || y < 0 || z < 0)
         {
-          throw std::runtime_error("Error: invalid copy number '" + xyz_str + "'");
+          throw std::runtime_error(getLineNumber() + "Error: invalid copy number '" + xyz_str + "'");
         }
         xyzVector.push_back(StateGraph::CnaTriple(x, y, z));
       }
       
       if (xyzVector.size() % 2 != 0)
       {
-        throw std::runtime_error("Error: odd number of xyz triples '" + line + "'");
+        throw std::runtime_error(getLineNumber() + "Error: odd number of xyz triples '" + line + "'");
       }
       
       StateGraph::StateEdgeSet stateTree;
@@ -802,7 +803,7 @@ std::istream& operator>>(std::istream& in,
       
       if (newDict[L].count(stateTree) > 0)
       {
-        throw std::runtime_error("Error: duplicate state tree '" + line + "'");
+        throw std::runtime_error(getLineNumber() + "Error: duplicate state tree '" + line + "'");
       }
       newDict[L].insert(stateTree);
     }

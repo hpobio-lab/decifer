@@ -366,8 +366,8 @@ bool HardClusterIlpCplex::solve(int nrThreads,
     return false;
   }
   
-  std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
-  std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+//  std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
+//  std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
   
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
   for (int j = 0; j < _k; ++j)
@@ -410,7 +410,7 @@ bool HardClusterIlpCplex::solve(int nrThreads,
           sum += -log(n);
           sum += -log(_scriptT[i].size());
           
-          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
+//          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
           
           _solT.emplace_back(convertToStateTreeFromDCF(_scriptT[i][t],
                                                        _solD[j], i));

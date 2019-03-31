@@ -476,6 +476,7 @@ double Solver::getLogLikelihood(int i) const
           {
             const double val = _logBinomCoeff[p][i] + var_pi * log(h) + ref_pi * log(1 - h);
             prod *= exp(val);
+            prod = std::max(std::numeric_limits<double>::min(), prod);
           }
         }
         else

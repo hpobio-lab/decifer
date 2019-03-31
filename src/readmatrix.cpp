@@ -302,15 +302,34 @@ std::istream& operator>>(std::istream& in,
         
       if (cnState._x < cnState._y)
       {
-        throw std::runtime_error("Error: Found unsorted copy-number state (" + std::to_string(cnState._x) + ", " + std::to_string(cnState._y)
+        throw std::runtime_error(getLineNumber() +
+                                 "Error: Found unsorted copy-number state (" + std::to_string(cnState._x) + ", " + std::to_string(cnState._y)
                                  + "); copy-number state must be ordered s.t. first copy number should always be the higher");
       }
       
       if (cnState._x > max_x) max_x = cnState._x;
       if (cnState._y > max_y) max_y = cnState._y;
       
-      R._cnStates[p][c].push_back(cnState);
-      R._cnStateToMu[p][c][IntPair(cnState._x, cnState._y)] = cnState._mu;
+      IntPair xy(cnState._x, cnState._y);
+      
+      if (R._cnStateToMu[p][c].count(xy) == 0)
+      {
+        R._cnStates[p][c].push_back(cnState);
+        R._cnStateToMu[p][c][xy] = 0;
+      }
+      else
+      {
+        for (ReadMatrix::CopyNumberState& cnState2 : R._cnStates[p][c])
+        {
+          if (cnState2._x == cnState._x && cnState2._y == cnState._y)
+          {
+            cnState2._mu += cnState._mu;
+          }
+        }
+      }
+      
+      
+      R._cnStateToMu[p][c][xy] += cnState._mu;
     }
     
     present[p][c] = true;

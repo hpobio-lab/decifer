@@ -194,7 +194,7 @@ bool EM::initializeD(int seed,
   else if (seed == 0)
   {
     // hard clustering (distance)
-    std::cerr << "Hard clustering (distance)..." << std::endl;
+//    std::cerr << "Hard clustering (distance)..." << std::endl;
     std::unique_ptr<ClusterIlp> pILP = createClusterIlpSolver(R, 0);
     pILP->init();
 //    if (!_initY.empty())
@@ -222,7 +222,7 @@ bool EM::initializeD(int seed,
   else if (seed % 2 == 0)
   {
     {
-      std::cerr << "Hard clustering (probabilistic)..." << std::endl;
+//      std::cerr << "Hard clustering (probabilistic)..." << std::endl;
       std::unique_ptr<HardClusterIlp> pILP = createHardClusterIlpSolver(R);
       pILP->init();
 //      if (!_initY.empty())
@@ -256,7 +256,7 @@ bool EM::initializeD(int seed,
     double limit = 1. / (1 << 20);
     while (alpha >= limit)
     {
-      std::cerr << "Hard clustering (confidence intervals)..." << std::endl;
+//      std::cerr << "Hard clustering (confidence intervals)..." << std::endl;
       std::unique_ptr<ClusterIlp> pILP = createClusterIlpSolver(R, alpha);
       pILP->init();
       
@@ -304,7 +304,7 @@ bool EM::solve(int seed,
   initializeD(seed, nrThreads, timeLimit, verbose, nrDownSampledSNVs, memoryLimit);
   
   updateLogLikelihood();
-  std::cerr << "Iteration = 0" << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
+  std::cerr << "k == " << _k << " -- Iteration = 0" << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
   
   int step = 0;
   while (true)
@@ -312,12 +312,12 @@ bool EM::solve(int seed,
     stepE();
     if (!stepM(nrThreads, verbose))
     {
-      std::cerr << "Iteration = " << ++step << " -- infeasible solution! " << " -- " << timer.realTime() << " s" << std::endl;
+      std::cerr << "k == " << _k << " -- Iteration = " << ++step << " -- infeasible solution! " << " -- " << timer.realTime() << " s" << std::endl;
       return false;
     }
     
     double delta = updateLogLikelihood();
-    std::cerr << "Iteration = " << ++step << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
+    std::cerr << "k == " << _k << " -- Iteration = " << ++step << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
     if (!g_tol.nonZero(delta))
     {
       break;
@@ -477,6 +477,7 @@ void EM::stepE()
             {
               const double val = _logBinomCoeff[p][i] + var_pi * log(h) + ref_pi * log(1 - h);
               prod *= exp(val);
+              prod = std::max(std::numeric_limits<double>::min(), prod);
             }
           }
           else
@@ -485,66 +486,32 @@ void EM::stepE()
             break;
           }
         }
+        _gamma[i][t][j] = prod;
         sum += prod;
       }
     }
     
+    bool ok = false;
     for (int t = 0; t < scriptT_i.size(); ++t)
     {
-      const StateEdgeSet& T_it = scriptT_i[t];
       for (int j = 0; j < _k; ++j)
       {
-        double prod_tj = _solPi[j];
-        for (int p = 0; p < m; ++p)
-        {
-          const ReadMatrix::CopyNumberStateVector& cnStates_pi = _R.getCopyNumberStates(p, i);
-          const int var_pi = _R.getVar(p, i);
-          const int ref_pi = _R.getRef(p, i);
-          
-          if (isFeasible(_solD[j][p],
-                         _xyStar[i][t],
-                         cnStates_pi,
-                         T_it,
-                         maxCopyNumber))
-          {
-            const double h = (_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p];
-            assert(_denominator[i][p] != 0);
-            if (h <= 0 || h >= 1)
-            {
-              if (h <= 0 && var_pi == 0)
-              {
-                prod_tj *= exp(_logBinomCoeff[p][i]);
-              }
-              else if (h >= 1 && ref_pi == 0)
-              {
-                prod_tj *= exp(_logBinomCoeff[p][i]);
-              }
-              else
-              {
-                prod_tj = 0;
-                break;
-              }
-            }
-            else
-            {
-              const double val = _logBinomCoeff[p][i] + var_pi * log(h) + ref_pi * log(1 - h);
-              prod_tj *= exp(val);
-            }
-          }
-          else
-          {
-            prod_tj = 0;
-            break;
-          }
-        }
-        
-        _gamma[i][t][j] = prod_tj / sum;
+        _gamma[i][t][j] /= sum;
         if (!g_tol.nonZero(_gamma[i][t][j]))
         {
           _gamma[i][t][j] = 0;
         }
+        else
+        {
+          ok = true;
+        }
       }
     }
+//    if (!ok)
+//    {
+//      std::cerr << "Houston" << std::endl;
+//    }
+//    assert(ok);
   }
 }
 
