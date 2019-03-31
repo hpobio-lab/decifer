@@ -21,7 +21,7 @@ bool next(const int maxXY,
   
   IntVector newEnumState = enumState;
   
-  int i = maxCN;
+  int i = maxCN - 1;
   for (; i >= 0; --i)
   {
     if (newEnumState[i] < maxEnumState[i] - 1)
