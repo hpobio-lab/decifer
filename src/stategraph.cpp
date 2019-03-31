@@ -50,26 +50,26 @@ void StateGraph::init()
   // vertices
   for (int x = 0; x <= _maxCopyNumber; ++x)
   {
-    for (int y = 0; y <= x; ++y)
+    for (int y = 0; y <= _maxCopyNumber; ++y)
     {
-      for (int z = 0; z <= x; ++z)
+      for (int xbar = 0; xbar <= x; ++xbar)
       {
-        Node v_xyz0 = _G.addNode();
-        _toNode[x][y][z][0] = v_xyz0;
-        _x[v_xyz0] = x;
-        _y[v_xyz0] = y;
-        _xbar[v_xyz0] = z;
-        _ybar[v_xyz0] = 0;
-        
-        if (0 < z && z <= y)
-        {
-          Node v_xy0z = _G.addNode();
-          _toNode[x][y][0][z] = v_xy0z;
-          _x[v_xy0z] = x;
-          _y[v_xy0z] = y;
-          _xbar[v_xy0z] = 0;
-          _ybar[v_xy0z] = z;
-        }
+        Node v_xy_xbar0 = _G.addNode();
+        _toNode[x][y][xbar][0] = v_xy_xbar0;
+        _x[v_xy_xbar0] = x;
+        _y[v_xy_xbar0] = y;
+        _xbar[v_xy_xbar0] = xbar;
+        _ybar[v_xy_xbar0] = 0;
+      }
+      
+      for (int ybar = 1; ybar <= y; ++ybar)
+      {
+        Node v_xy_0ybar = _G.addNode();
+        _toNode[x][y][0][ybar] = v_xy_0ybar;
+        _x[v_xy_0ybar] = x;
+        _y[v_xy_0ybar] = y;
+        _xbar[v_xy_0ybar] = 0;
+        _ybar[v_xy_0ybar] = ybar;
       }
     }
   }
@@ -102,28 +102,28 @@ void StateGraph::init()
     {
       addEdge(v, AMPLIFICATION, x+1, y, xbar+1, ybar);
     }
-    if (0 < y && y < x && ybar < y)
+    if (0 < y && y < _maxCopyNumber && ybar < y)
     {
       addEdge(v, AMPLIFICATION, x, y+1, xbar, ybar);
     }
-    if (0 < y && y < x && ybar > 0)
+    if (0 < y && y < _maxCopyNumber && ybar > 0)
     {
       addEdge(v, AMPLIFICATION, x, y+1, xbar, ybar+1);
     }
-    if (x == y && xbar != ybar && 0 < y && ybar < y && y < _maxCopyNumber)
-    {
-      addEdge(v, AMPLIFICATION, y+1, x, ybar, xbar);
-    }
-    if (x == y && xbar != ybar && 0 < y && ybar > 0 && y < _maxCopyNumber)
-    {
-      addEdge(v, AMPLIFICATION, y+1, x, ybar+1, xbar);
-    }
+//    if (x == y && xbar != ybar && 0 < y && ybar < y && y < _maxCopyNumber)
+//    {
+//      addEdge(v, AMPLIFICATION, y+1, x, ybar, xbar);
+//    }
+//    if (x == y && xbar != ybar && 0 < y && ybar > 0 && y < _maxCopyNumber)
+//    {
+//      addEdge(v, AMPLIFICATION, y+1, x, ybar+1, xbar);
+//    }
     // deletion edges
-    if (x > xbar && x > y)
+    if (x > xbar)
     {
       addEdge(v, DELETION, x-1, y, xbar, ybar);
     }
-    if (xbar > 0 && x > y)
+    if (xbar > 0)
     {
       addEdge(v, DELETION, x-1, y, xbar-1, ybar);
     }
@@ -135,14 +135,14 @@ void StateGraph::init()
     {
       addEdge(v, DELETION, x, y-1, xbar, ybar-1);
     }
-    if (x == y && xbar != ybar && x > xbar)
-    {
-      addEdge(v, DELETION, y, x-1, ybar, xbar);
-    }
-    if (x == y && xbar != ybar && xbar > 0)
-    {
-      addEdge(v, DELETION, y, x-1, ybar, xbar-1);
-    }
+//    if (x == y && xbar != ybar && x > xbar)
+//    {
+//      addEdge(v, DELETION, y, x-1, ybar, xbar);
+//    }
+//    if (x == y && xbar != ybar && xbar > 0)
+//    {
+//      addEdge(v, DELETION, y, x-1, ybar, xbar-1);
+//    }
   }
 }
   
