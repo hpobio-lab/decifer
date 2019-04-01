@@ -375,6 +375,10 @@ bool HardClusterIlpCplex::solve(int nrThreads,
     for (int p = 0; p < m; ++p)
     {
       _solD[j][p] = _cplex.getValue(_d[j][p]);
+      if (_solD[j][p] == g_tol.epsilon())
+      {
+        _solD[j][p] = 0;
+      }
     }
   }
   

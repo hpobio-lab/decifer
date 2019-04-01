@@ -108,15 +108,6 @@ void EMCplex::initPWLA()
     }
   }
   
-  // TODO: REMOVE_ME
-//  for (int j = 0; j < _k; ++j)
-//  {
-//    for (int p = 0; p < m; ++p)
-//    {
-//      _model.add(_fGRB[j][p] == _solD[j][p]);
-//    }
-//  }
-  
   IloExpr obj(_env);
   for (int i = 0; i < n; ++i)
   {
@@ -177,6 +168,11 @@ bool EMCplex::stepM(int nrThreads,
     for (int p = 0; p < m; ++p)
     {
       _solD[j][p] = _cplex.getValue(_fGRB[j][p]);
+      
+      if (_solD[j][p] == g_tol.epsilon())
+      {
+        _solD[j][p] = 0;
+      }
     }
   }
   
