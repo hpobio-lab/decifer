@@ -1,0 +1,471 @@
+#Observations: 57862
+Minimum #clusters: 1
+k == 1 -- Iteration = 0 -- log likelihood = -157247 -- 182.607 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 211.966 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 241.47 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -141154 -- 74.5499 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 104.101 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 131.451 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -149945 -- 181.856 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 210.406 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 241.734 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -147362 -- 181.347 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 213.84 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 246.707 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -158425 -- 182.652 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 214.503 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 243.79 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -150676 -- 78.6101 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 107.141 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 136.771 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -140362 -- 66.5686 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 95.2743 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 124.3 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -203618 -- 183.199 s
+k == 1 -- Iteration = 1 -- log likelihood = -209747 -- 185.511 s
+k == 1 -- Iteration = 2 -- log likelihood = -209747 -- 187.699 s
+
+k == 1 -- Iteration = 0 -- log likelihood = -141518 -- 181.911 s
+k == 1 -- Iteration = 1 -- log likelihood = -144489 -- 212.395 s
+k == 1 -- Iteration = 2 -- log likelihood = -144489 -- 243.2 s
+
+k = 1 -- Log likelihood -144489 -- BIC 289132
+k == 2 -- Iteration = 0 -- log likelihood = -122296 -- 186.249 s
+k == 2 -- Iteration = 1 -- log likelihood = -105647 -- 192.41 s
+k == 2 -- Iteration = 2 -- log likelihood = -105194 -- 199.542 s
+k == 2 -- Iteration = 3 -- log likelihood = -105194 -- 206.636 s
+k == 2 -- Iteration = 4 -- log likelihood = -105194 -- 213.774 s
+k == 2 -- Iteration = 5 -- log likelihood = -105194 -- 220.809 s
+
+k == 2 -- Iteration = 0 -- log likelihood = -137018 -- 184.549 s
+k == 2 -- Iteration = 1 -- log likelihood = -138094 -- 190.19 s
+k == 2 -- Iteration = 2 -- log likelihood = -137926 -- 195.883 s
+k == 2 -- Iteration = 3 -- log likelihood = -137925 -- 201.652 s
+k == 2 -- Iteration = 4 -- log likelihood = -137925 -- 207.232 s
+k == 2 -- Iteration = 5 -- log likelihood = -137925 -- 212.999 s
+k == 2 -- Iteration = 6 -- log likelihood = -137925 -- 218.803 s
+
+k == 2 -- Iteration = 0 -- log likelihood = -140820 -- 184.18 s
+k == 2 -- Iteration = 1 -- log likelihood = -134631 -- 198.932 s
+k == 2 -- Iteration = 2 -- log likelihood = -134631 -- 213.095 s
+k == 2 -- Iteration = 3 -- log likelihood = -134631 -- 226.721 s
+k == 2 -- Iteration = 4 -- log likelihood = -134631 -- 241.014 s
+k == 2 -- Iteration = 5 -- log likelihood = -134631 -- 254.638 s
+
+k == 2 -- Iteration = 0 -- log likelihood = -inf -- 183.267 s
+k == 2 -- Iteration = 1 -- log likelihood = -inf -- 194.078 s
+k == 2 -- Iteration = 0 -- log likelihood = -130664 -- 187.036 s
+k == 2 -- Iteration = 1 -- log likelihood = -114536 -- 205.844 s
+k == 2 -- Iteration = 2 -- log likelihood = -110410 -- 224.286 s
+k == 2 -- Iteration = 3 -- log likelihood = -106848 -- 238.995 s
+k == 2 -- Iteration = 4 -- log likelihood = -106400 -- 254.028 s
+k == 2 -- Iteration = 5 -- log likelihood = -106401 -- 268.521 s
+k == 2 -- Iteration = 6 -- log likelihood = -106401 -- 282.81 s
+k == 2 -- Iteration = 7 -- log likelihood = -106401 -- 296.492 s
+
+k == 2 -- Iteration = 0 -- log likelihood = -146774 -- 184.491 s
+k == 2 -- Iteration = 1 -- log likelihood = -133971 -- 201.058 s
+k == 2 -- Iteration = 2 -- log likelihood = -134102 -- 216.161 s
+k == 2 -- Iteration = 3 -- log likelihood = -134102 -- 231.474 s
+k == 2 -- Iteration = 4 -- log likelihood = -134102 -- 247.939 s
+k == 2 -- Iteration = 5 -- log likelihood = -134102 -- 264.166 s
+
+k == 2 -- Iteration = 0 -- log likelihood = -inf -- 183.357 s
+k == 2 -- Iteration = 1 -- log likelihood = -inf -- 190.888 s
+k == 2 -- Iteration = 0 -- log likelihood = -102665 -- 187.767 s
+k == 2 -- Iteration = 1 -- log likelihood = -110745 -- 193.439 s
+k == 2 -- Iteration = 2 -- log likelihood = -110518 -- 199.471 s
+k == 2 -- Iteration = 3 -- log likelihood = -110519 -- 205.755 s
+k == 2 -- Iteration = 4 -- log likelihood = -110519 -- 211.892 s
+k == 2 -- Iteration = 5 -- log likelihood = -110519 -- 218.22 s
+k == 2 -- Iteration = 6 -- log likelihood = -110519 -- 224.66 s
+
+k = 2 -- Log likelihood -105194 -- BIC 210618
+k == 3 -- Iteration = 0 -- log likelihood = -284794 -- 191.103 s
+k == 3 -- Iteration = 1 -- log likelihood = -inf -- 197.123 s
+k == 3 -- Iteration = 2 -- log likelihood = -inf -- 200.134 s
+k == 3 -- Iteration = 0 -- log likelihood = -132462 -- 186.581 s
+k == 3 -- Iteration = 1 -- log likelihood = -129242 -- 208.057 s
+k == 3 -- Iteration = 2 -- log likelihood = -127385 -- 227.014 s
+k == 3 -- Iteration = 3 -- log likelihood = -127659 -- 246.397 s
+k == 3 -- Iteration = 4 -- log likelihood = -127659 -- 264.869 s
+k == 3 -- Iteration = 5 -- log likelihood = -127659 -- 283.974 s
+k == 3 -- Iteration = 6 -- log likelihood = -127659 -- 302.762 s
+k == 3 -- Iteration = 7 -- log likelihood = -127659 -- 321.594 s
+
+k == 3 -- Iteration = 0 -- log likelihood = -212027 -- 187.227 s
+k == 3 -- Iteration = 1 -- log likelihood = -209697 -- 222.946 s
+k == 3 -- Iteration = 2 -- log likelihood = -209698 -- 256.689 s
+k == 3 -- Iteration = 3 -- log likelihood = -209699 -- 289.704 s
+k == 3 -- Iteration = 4 -- log likelihood = -209699 -- 322.103 s
+k == 3 -- Iteration = 5 -- log likelihood = -209699 -- 356.938 s
+k == 3 -- Iteration = 6 -- log likelihood = -209699 -- 391.934 s
+k == 3 -- Iteration = 7 -- log likelihood = -209699 -- 427.597 s
+k == 3 -- Iteration = 8 -- log likelihood = -209699 -- 460.015 s
+k == 3 -- Iteration = 9 -- log likelihood = -209699 -- 494.372 s
+
+k == 3 -- Iteration = 0 -- log likelihood = -101279 -- 184.578 s
+k == 3 -- Iteration = 1 -- log likelihood = -85251.3 -- 193.596 s
+k == 3 -- Iteration = 2 -- log likelihood = -83963.2 -- 202.135 s
+k == 3 -- Iteration = 3 -- log likelihood = -83963.1 -- 210.681 s
+k == 3 -- Iteration = 4 -- log likelihood = -83963.1 -- 219.685 s
+k == 3 -- Iteration = 5 -- log likelihood = -83963.1 -- 228.706 s
+k == 3 -- Iteration = 6 -- log likelihood = -83963.1 -- 237.303 s
+
+k == 3 -- Iteration = 0 -- log likelihood = -inf -- 189.626 s
+k == 3 -- Iteration = 1 -- log likelihood = -inf -- 192.503 s
+k == 3 -- Iteration = 0 -- log likelihood = -inf -- 186.061 s
+k == 3 -- Iteration = 1 -- log likelihood = -inf -- 188.923 s
+k == 3 -- Iteration = 0 -- log likelihood = -104999 -- 185.463 s
+k == 3 -- Iteration = 1 -- log likelihood = -96213.8 -- 197.777 s
+k == 3 -- Iteration = 2 -- log likelihood = -96289.1 -- 210.935 s
+k == 3 -- Iteration = 3 -- log likelihood = -96288.7 -- 224.05 s
+k == 3 -- Iteration = 4 -- log likelihood = -96288.7 -- 236.937 s
+k == 3 -- Iteration = 5 -- log likelihood = -96288.7 -- 250.064 s
+
+k = 3 -- Log likelihood -83963.1 -- BIC 168233
+k == 4 -- Iteration = 0 -- log likelihood = -97562.3 -- 192.607 s
+k == 4 -- Iteration = 1 -- log likelihood = -81354 -- 200.266 s
+k == 4 -- Iteration = 2 -- log likelihood = -82413.1 -- 208.518 s
+k == 4 -- Iteration = 3 -- log likelihood = -82372.3 -- 216.018 s
+k == 4 -- Iteration = 4 -- log likelihood = -82372.3 -- 223.988 s
+k == 4 -- Iteration = 5 -- log likelihood = -82372.3 -- 231.594 s
+k == 4 -- Iteration = 6 -- log likelihood = -82372.3 -- 239.359 s
+
+k == 4 -- Iteration = 0 -- log likelihood = -88032.4 -- 189.517 s
+k == 4 -- Iteration = 1 -- log likelihood = -83915 -- 199.171 s
+k == 4 -- Iteration = 2 -- log likelihood = -83660.4 -- 209.289 s
+k == 4 -- Iteration = 3 -- log likelihood = -83660.4 -- 220.311 s
+k == 4 -- Iteration = 4 -- log likelihood = -83660.4 -- 230.85 s
+k == 4 -- Iteration = 5 -- log likelihood = -83660.5 -- 241.891 s
+k == 4 -- Iteration = 6 -- log likelihood = -83660.5 -- 253.049 s
+k == 4 -- Iteration = 7 -- log likelihood = -83660.5 -- 264.28 s
+k == 4 -- Iteration = 8 -- log likelihood = -83660.5 -- 275.493 s
+k == 4 -- Iteration = 9 -- log likelihood = -83660.5 -- 286.329 s
+k == 4 -- Iteration = 10 -- log likelihood = -83660.5 -- 297.478 s
+k == 4 -- Iteration = 11 -- log likelihood = -83660.5 -- 308.392 s
+
+k == 4 -- Iteration = 0 -- log likelihood = -inf -- 188.176 s
+k == 4 -- Iteration = 1 -- log likelihood = -inf -- 191.925 s
+k == 4 -- Iteration = 0 -- log likelihood = -105083 -- 185.667 s
+k == 4 -- Iteration = 1 -- log likelihood = -86977.4 -- 194.954 s
+k == 4 -- Iteration = 2 -- log likelihood = -84957.8 -- 204.002 s
+k == 4 -- Iteration = 3 -- log likelihood = -84827 -- 212.716 s
+k == 4 -- Iteration = 4 -- log likelihood = -84827.1 -- 221.534 s
+k == 4 -- Iteration = 5 -- log likelihood = -84827.1 -- 230.768 s
+k == 4 -- Iteration = 6 -- log likelihood = -84827.1 -- 239.308 s
+k == 4 -- Iteration = 7 -- log likelihood = -84827.1 -- 248.306 s
+
+k == 4 -- Iteration = 0 -- log likelihood = -inf -- 190.911 s
+k == 4 -- Iteration = 1 -- log likelihood = -inf -- 194.662 s
+k == 4 -- Iteration = 0 -- log likelihood = -inf -- 189.252 s
+k == 4 -- Iteration = 1 -- log likelihood = -inf -- 192.952 s
+k == 4 -- Iteration = 0 -- log likelihood = -192819 -- 186.911 s
+k == 4 -- Iteration = 1 -- log likelihood = -193163 -- 199.213 s
+k == 4 -- Iteration = 2 -- log likelihood = -193162 -- 211.819 s
+k == 4 -- Iteration = 3 -- log likelihood = -193162 -- 225.101 s
+k == 4 -- Iteration = 4 -- log likelihood = -193162 -- 237.881 s
+k == 4 -- Iteration = 5 -- log likelihood = -193162 -- 251.084 s
+k == 4 -- Iteration = 6 -- log likelihood = -193162 -- 264.145 s
+k == 4 -- Iteration = 7 -- log likelihood = -193162 -- 277.178 s
+k == 4 -- Iteration = 8 -- log likelihood = -193162 -- 290.252 s
+
+k == 4 -- Iteration = 0 -- log likelihood = -inf -- 193.795 s
+k == 4 -- Iteration = 1 -- log likelihood = -inf -- 197.615 s
+k = 4 -- Log likelihood -82372.3 -- BIC 165128
+k == 5 -- Iteration = 0 -- log likelihood = -284941 -- 196.342 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 203.91 s
+k == 5 -- Iteration = 2 -- log likelihood = -inf -- 208.786 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 190.552 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 195.173 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 189.775 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 194.37 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 186.103 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 190.7 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 194.603 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 199.314 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 191.658 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 196.27 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 188.725 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 193.384 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 197.732 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 202.522 s
+k == 5 -- Iteration = 0 -- log likelihood = -inf -- 191.516 s
+k == 5 -- Iteration = 1 -- log likelihood = -inf -- 196.168 s
+k == 5 -- Iteration = 0 -- log likelihood = -103645 -- 194.901 s
+k == 5 -- Iteration = 1 -- log likelihood = -105052 -- 204.676 s
+k == 5 -- Iteration = 2 -- log likelihood = -104597 -- 213.968 s
+k == 5 -- Iteration = 3 -- log likelihood = -104477 -- 223.052 s
+k == 5 -- Iteration = 4 -- log likelihood = -104477 -- 232.229 s
+k == 5 -- Iteration = 5 -- log likelihood = -104477 -- 241.468 s
+k == 5 -- Iteration = 6 -- log likelihood = -104477 -- 250.458 s
+k == 5 -- Iteration = 7 -- log likelihood = -104477 -- 259.523 s
+
+k = 5 -- Log likelihood -104477 -- BIC 209414
+k == 6 -- Iteration = 0 -- log likelihood = -284993 -- 200.228 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 208.751 s
+k == 6 -- Iteration = 2 -- log likelihood = -inf -- 214.47 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 194.963 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 200.665 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 193.179 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 198.845 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 189.611 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 195.204 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 198.713 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 204.378 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 193.978 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 199.682 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 191.28 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 197.003 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 202.627 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 208.375 s
+k == 6 -- Iteration = 0 -- log likelihood = -inf -- 192.478 s
+k == 6 -- Iteration = 1 -- log likelihood = -inf -- 198.143 s
+k = 6 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 7 -- Iteration = 0 -- log likelihood = -285037 -- 204.716 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 214.39 s
+k == 7 -- Iteration = 2 -- log likelihood = -inf -- 221.354 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 196.64 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 203.409 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 195.986 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 202.626 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 189.869 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 196.476 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 202.63 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 209.213 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 195.886 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 202.402 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 191.347 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 198.939 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 206.294 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 212.924 s
+k == 7 -- Iteration = 0 -- log likelihood = -inf -- 195.014 s
+k == 7 -- Iteration = 1 -- log likelihood = -inf -- 201.703 s
+k = 7 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 8 -- Iteration = 0 -- log likelihood = -285075 -- 207.701 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 217.953 s
+k == 8 -- Iteration = 2 -- log likelihood = -inf -- 225.533 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 199.09 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 206.56 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 197.989 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 205.628 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 191.627 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 199.25 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 206.989 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 214.763 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 199.287 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 206.812 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 193.937 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 201.419 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 209.499 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 217.051 s
+k == 8 -- Iteration = 0 -- log likelihood = -inf -- 197.341 s
+k == 8 -- Iteration = 1 -- log likelihood = -inf -- 204.981 s
+k = 8 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 9 -- Iteration = 0 -- log likelihood = -285109 -- 212.067 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 223.244 s
+k == 9 -- Iteration = 2 -- log likelihood = -inf -- 231.842 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 201.805 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 210.322 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 200.422 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 208.825 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 192.917 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 201.52 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 208.822 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 217.37 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 201.803 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 210.182 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 195.704 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 204.248 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 214.606 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 222.997 s
+k == 9 -- Iteration = 0 -- log likelihood = -inf -- 198.389 s
+k == 9 -- Iteration = 1 -- log likelihood = -inf -- 206.892 s
+k = 9 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 10 -- Iteration = 0 -- log likelihood = -285139 -- 215.418 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 227.662 s
+k == 10 -- Iteration = 2 -- log likelihood = -inf -- 236.993 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 204.074 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 213.648 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 202.454 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 211.869 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 194.258 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 203.596 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 215.115 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 224.844 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 205.465 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 214.898 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 198.328 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 207.988 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 228.257 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 237.617 s
+k == 10 -- Iteration = 0 -- log likelihood = -inf -- 202.002 s
+k == 10 -- Iteration = 1 -- log likelihood = -inf -- 211.384 s
+k = 10 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 11 -- Iteration = 0 -- log likelihood = -285166 -- 224.04 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 237.393 s
+k == 11 -- Iteration = 2 -- log likelihood = -inf -- 247.903 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 207.577 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 217.804 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 204.841 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 215.072 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 195.919 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 206.466 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 215.666 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 226.121 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 207.301 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 217.808 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 200.107 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 210.335 s
+k == 11 -- Iteration = 0 -- log likelihood = -inf -- 256.623 s
+k == 11 -- Iteration = 1 -- log likelihood = -inf -- 266.874 s
+k = 11 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 12 -- Iteration = 0 -- log likelihood = -285191 -- 236.583 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 250.521 s
+k == 12 -- Iteration = 2 -- log likelihood = -inf -- 261.779 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 210.784 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 221.956 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 208.577 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 220.159 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 197.813 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 208.926 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 240.867 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 251.98 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 209.891 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 221.314 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 201.054 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 212.248 s
+k == 12 -- Iteration = 0 -- log likelihood = -inf -- 298.346 s
+k == 12 -- Iteration = 1 -- log likelihood = -inf -- 309.557 s
+k = 12 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 13 -- Iteration = 0 -- log likelihood = -285214 -- 256.938 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 271.849 s
+k == 13 -- Iteration = 2 -- log likelihood = -inf -- 284.216 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 214.685 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 226.91 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 212.023 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 224.377 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 198.449 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 210.629 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 261.815 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 274.094 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 212.992 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 225.086 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 204.024 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 216.443 s
+k == 13 -- Iteration = 0 -- log likelihood = -inf -- 340.669 s
+k == 13 -- Iteration = 1 -- log likelihood = -inf -- 352.537 s
+k = 13 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 14 -- Iteration = 0 -- log likelihood = -285235 -- 289.201 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 304.784 s
+k == 14 -- Iteration = 2 -- log likelihood = -inf -- 317.882 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 216.48 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 229.464 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 219.127 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 232.141 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 200.299 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 213.543 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 291.592 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 304.605 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 217.618 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 230.737 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 206.622 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 219.558 s
+k == 14 -- Iteration = 0 -- log likelihood = -inf -- 363.726 s
+k == 14 -- Iteration = 1 -- log likelihood = -inf -- 376.913 s
+k = 14 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 15 -- Iteration = 0 -- log likelihood = -285255 -- 330.846 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 347.856 s
+k == 15 -- Iteration = 2 -- log likelihood = -inf -- 362.311 s
+k == 15 -- Iteration = 0 -- log likelihood = -inf -- 220.377 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 234.64 s
+k == 15 -- Iteration = 0 -- log likelihood = -inf -- 219.051 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 233.221 s
+k == 15 -- Iteration = 0 -- log likelihood = -inf -- 202.679 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 216.545 s
+k == 15 -- Iteration = 0 -- log likelihood = -inf -- 331.721 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 345.689 s
+k == 15 -- Iteration = 0 -- log likelihood = -inf -- 220.862 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 234.967 s
+k == 15 -- Iteration = 0 -- log likelihood = -inf -- 208.145 s
+k == 15 -- Iteration = 1 -- log likelihood = -inf -- 222.386 s
+k = 15 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 16 -- Iteration = 0 -- log likelihood = -285273 -- 370.018 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 387.87 s
+k == 16 -- Iteration = 2 -- log likelihood = -inf -- 403.097 s
+k == 16 -- Iteration = 0 -- log likelihood = -inf -- 222.202 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 237.383 s
+k == 16 -- Iteration = 0 -- log likelihood = -inf -- 240.94 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 255.965 s
+k == 16 -- Iteration = 0 -- log likelihood = -inf -- 205.04 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 220.068 s
+k == 16 -- Iteration = 0 -- log likelihood = -inf -- 353.296 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 368.446 s
+k == 16 -- Iteration = 0 -- log likelihood = -inf -- 235.332 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 250.395 s
+k == 16 -- Iteration = 0 -- log likelihood = -inf -- 210.063 s
+k == 16 -- Iteration = 1 -- log likelihood = -inf -- 224.639 s
+k = 16 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 17 -- Iteration = 0 -- log likelihood = -285291 -- 397.231 s
+k == 17 -- Iteration = 1 -- log likelihood = -inf -- 415.572 s
+k == 17 -- Iteration = 2 -- log likelihood = -inf -- 431.653 s
+k == 17 -- Iteration = 0 -- log likelihood = -inf -- 227.71 s
+k == 17 -- Iteration = 1 -- log likelihood = -inf -- 243.321 s
+k == 17 -- Iteration = 0 -- log likelihood = -inf -- 248.277 s
+k == 17 -- Iteration = 1 -- log likelihood = -inf -- 263.726 s
+k == 17 -- Iteration = 0 -- log likelihood = -inf -- 204.153 s
+k == 17 -- Iteration = 1 -- log likelihood = -inf -- 219.874 s
+k == 17 -- Iteration = 0 -- log likelihood = -inf -- 388.358 s
+k == 17 -- Iteration = 1 -- log likelihood = -inf -- 404.972 s
+k == 17 -- Iteration = 0 -- log likelihood = -inf -- 239.588 s
+k == 17 -- Iteration = 1 -- log likelihood = -inf -- 255.172 s
+k = 17 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 18 -- Iteration = 0 -- log likelihood = -285307 -- 420.199 s
+k == 18 -- Iteration = 1 -- log likelihood = -inf -- 439.246 s
+k == 18 -- Iteration = 2 -- log likelihood = -inf -- 456.317 s
+k == 18 -- Iteration = 0 -- log likelihood = -inf -- 239.796 s
+k == 18 -- Iteration = 1 -- log likelihood = -inf -- 256.179 s
+k == 18 -- Iteration = 0 -- log likelihood = -inf -- 277.873 s
+k == 18 -- Iteration = 1 -- log likelihood = -inf -- 294.286 s
+k == 18 -- Iteration = 0 -- log likelihood = -inf -- 206.709 s
+k == 18 -- Iteration = 1 -- log likelihood = -inf -- 223.355 s
+k == 18 -- Iteration = 0 -- log likelihood = -inf -- 401.914 s
+k == 18 -- Iteration = 1 -- log likelihood = -inf -- 418.624 s
+k == 18 -- Iteration = 0 -- log likelihood = -inf -- 254.303 s
+k == 18 -- Iteration = 1 -- log likelihood = -inf -- 270.542 s
+k = 18 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 19 -- Iteration = 0 -- log likelihood = -285322 -- 533.41 s
+k == 19 -- Iteration = 1 -- log likelihood = -inf -- 553.702 s
+k == 19 -- Iteration = 2 -- log likelihood = -inf -- 571.401 s
+k == 19 -- Iteration = 0 -- log likelihood = -inf -- 253.767 s
+k == 19 -- Iteration = 1 -- log likelihood = -inf -- 271.322 s
+k == 19 -- Iteration = 0 -- log likelihood = -inf -- 291.761 s
+k == 19 -- Iteration = 1 -- log likelihood = -inf -- 309.661 s
+k == 19 -- Iteration = 0 -- log likelihood = -inf -- 210.661 s
+k == 19 -- Iteration = 1 -- log likelihood = -inf -- 228.287 s
+k == 19 -- Iteration = 0 -- log likelihood = -inf -- 442.473 s
+k == 19 -- Iteration = 1 -- log likelihood = -inf -- 460.265 s
+k = 19 -- Log likelihood -1.79769e+308 -- BIC inf
+k == 20 -- Iteration = 0 -- log likelihood = -285337 -- 265.102 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 286.447 s
+k == 20 -- Iteration = 2 -- log likelihood = -inf -- 305.249 s
+k == 20 -- Iteration = 0 -- log likelihood = -inf -- 265.879 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 284.154 s
+k == 20 -- Iteration = 0 -- log likelihood = -inf -- 353.939 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 372.481 s
+k == 20 -- Iteration = 0 -- log likelihood = -inf -- 212.758 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 231.389 s
+k == 20 -- Iteration = 0 -- log likelihood = -inf -- 256.37 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 274.843 s
+k == 20 -- Iteration = 0 -- log likelihood = -inf -- 302.261 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 320.582 s
+k == 20 -- Iteration = 0 -- log likelihood = -inf -- 221.003 s
+k == 20 -- Iteration = 1 -- log likelihood = -inf -- 239.732 s
+k = 20 -- Log likelihood -1.79769e+308 -- BIC inf
