@@ -12,11 +12,13 @@
 Solver::Solver(const ReadMatrix& R,
                int k,
                int nrSegments,
-               ClusterStatisticType statType)
+               ClusterStatisticType statType,
+               bool forceTruncal)
   : _R(R)
   , _k(k)
   , _nrSegments(nrSegments)
   , _statType(statType)
+  , _forceTruncal(forceTruncal)
   , _logFactorial(1, 0)
   , _scriptT(R.getNrCharacters())
   , _x()

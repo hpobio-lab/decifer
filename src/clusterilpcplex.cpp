@@ -11,8 +11,9 @@
 ClusterIlpCplex::ClusterIlpCplex(const ReadMatrix& R,
                                  int k,
                                  double alpha,
-                                 ClusterStatisticType statType)
-  : ClusterIlp(R, k, alpha, statType)
+                                 ClusterStatisticType statType,
+                                 bool forceTruncal)
+  : ClusterIlp(R, k, alpha, statType, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)
@@ -254,9 +255,49 @@ void ClusterIlpCplex::initConstraints()
     }
   }
   
-  for (int j = 1; j < _k; ++j)
+  if (_forceTruncal)
   {
-    _model.add(_d[j-1][0] >= _d[j][0]);
+    // Cluster sizes are nonincreasing
+    for (int i = 0; i < n; ++i)
+    {
+      for (int t = 0; t < _scriptT[i].size(); ++t)
+      {
+        sum += _y[i][t][0];
+      }
+    }
+    
+    IloExpr sum2(_env);
+    for (int j = 1; j < _k; ++j)
+    {
+      for (int i = 0; i < n; ++i)
+      {
+        for (int t = 0; t < _scriptT[i].size(); ++t)
+        {
+          sum2 += _y[i][t][j];
+        }
+      }
+      _model.add(sum >= sum2);
+      sum = sum2;
+      sum2.clear();
+    }
+    sum.clear();
+    sum2.end();
+    
+    // Cluster 0 has largest DCF in all samples
+    for (int j = 1; j < _k; ++j)
+    {
+      for (int p = 0; p < m; ++p)
+      {
+        _model.add(_d[j][p] <= _d[0][p]);
+      }
+    }
+  }
+  else
+  {
+    for (int j = 1; j < _k; ++j)
+    {
+      _model.add(_d[j-1][0] >= _d[j][0]);
+    }
   }
   
   _model.add(IloMinimize(_env, sum));

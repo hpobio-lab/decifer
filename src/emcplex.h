@@ -22,10 +22,12 @@ public:
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
   /// @param statType Summary statistic to use for clustering
+  /// @param forceTruncal Force the presence of a dominant truncal cluster
   EMCplex(const ReadMatrix& R,
           int k,
           int nrSegments,
-          ClusterStatisticType statType);
+          ClusterStatisticType statType,
+          bool forceTruncal);
   
   virtual ~EMCplex()
   {
@@ -43,7 +45,8 @@ protected:
     return std::unique_ptr<HardClusterIlp>(new HardClusterIlpCplex(R,
                                                                    _k,
                                                                    _nrSegments,
-                                                                   _statType));
+                                                                   _statType,
+                                                                   _forceTruncal));
   }
   
   virtual std::unique_ptr<ClusterIlp> createClusterIlpSolver(const ReadMatrix& R,
@@ -52,7 +55,8 @@ protected:
     return std::unique_ptr<ClusterIlp>(new ClusterIlpCplex(R,
                                                            _k,
                                                            alpha,
-                                                           _statType));
+                                                           _statType,
+                                                           _forceTruncal));
   }
   
   typedef IloArray<IloNumVarArray> IloNumVarMatrix;

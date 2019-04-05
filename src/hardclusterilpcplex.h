@@ -20,10 +20,12 @@ public:
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
   /// @param statType Summary statistic to use for clustering
+  /// @param forceTruncal Force the presence of a dominant truncal cluster
   HardClusterIlpCplex(const ReadMatrix& R,
                       int k,
                       int nrSegments,
-                      ClusterStatisticType statType);
+                      ClusterStatisticType statType,
+                      bool forceTruncal);
 
   /// Export ILP
   ///

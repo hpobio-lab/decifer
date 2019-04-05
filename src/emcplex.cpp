@@ -10,8 +10,9 @@
 EMCplex::EMCplex(const ReadMatrix& R,
                  int k,
                  int nrSegments,
-                 ClusterStatisticType statType)
-  : EM(R, k, nrSegments, statType)
+                 ClusterStatisticType statType,
+                 bool forceTruncal)
+  : EM(R, k, nrSegments, statType, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)
@@ -127,6 +128,18 @@ void EMCplex::initPWLA()
             }
           }
         }
+      }
+    }
+  }
+  
+  if (_forceTruncal)
+  {
+    // Cluster 0 has largest DCF in all samples
+    for (int j = 1; j < _k; ++j)
+    {
+      for (int p = 0; p < m; ++p)
+      {
+        _model.add(_fGRB[j][p] <= _fGRB[0][p]);
       }
     }
   }

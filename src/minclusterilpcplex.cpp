@@ -9,8 +9,9 @@
 
 MinClusterIlpCplex::MinClusterIlpCplex(const ReadMatrix& R,
                                        int kMax,
-                                       ClusterStatisticType statType)
-  : MinClusterIlp(R, kMax, statType)
+                                       ClusterStatisticType statType,
+                                       bool forceTruncal)
+  : MinClusterIlp(R, kMax, statType, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)
@@ -141,6 +142,7 @@ void MinClusterIlpCplex::initConstraints()
     }
   }
   
+  // Cluster sizes are nonincreasing
   for (int i = 0; i < n; ++i)
   {
     for (int t = 0; t < _scriptT[i].size(); ++t)
@@ -148,7 +150,6 @@ void MinClusterIlpCplex::initConstraints()
       sum += _y[i][t][0];
     }
   }
-  
   for (int j = 1; j < _k; ++j)
   {
     for (int i = 0; i < n; ++i)
@@ -176,6 +177,18 @@ void MinClusterIlpCplex::initConstraints()
     }
     _model.add(_b[j] <= sum);
     sum.clear();
+  }
+  
+  if (_forceTruncal)
+  {
+    // Cluster 0 has largest DCF in all samples
+    for (int j = 1; j < _k; ++j)
+    {
+      for (int p = 0; p < m; ++p)
+      {
+        _model.add(_d[j][p] <= _d[0][p]);
+      }
+    }
   }
   
   sum.end();

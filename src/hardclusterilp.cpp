@@ -10,8 +10,9 @@
 HardClusterIlp::HardClusterIlp(const ReadMatrix& R,
                                int k,
                                int nrSegments,
-                               ClusterStatisticType statType)
-  : Solver(R, k, nrSegments, statType)
+                               ClusterStatisticType statType,
+                               bool forceTruncal)
+  : Solver(R, k, nrSegments, statType, forceTruncal)
   , _hatN()
   , _z()
   , _solT()

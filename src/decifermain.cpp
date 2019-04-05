@@ -45,7 +45,8 @@ Solution runEM(const ReadMatrix& R,
                bool verbose,
                int downsampleSNVs,
                int localTimeLimit,
-               int memoryLimit)
+               int memoryLimit,
+               bool forceTruncal)
 {
   int new_seed = seed;
   if (method == 1)
@@ -81,7 +82,7 @@ Solution runEM(const ReadMatrix& R,
         break;
       }
       
-      EMAlg em(R, k, nrSegments, statType);
+      EMAlg em(R, k, nrSegments, statType, forceTruncal);
       em.init();
       em.initHotStart(initY);
       g_rng.seed(seed + rr);
@@ -136,9 +137,10 @@ Solution runCluster(const ReadMatrix& R,
                     const std::string& outputPrefix,
                     const BoolTensor& prevSolution,
                     bool verbose,
-                    int memoryLimit)
+                    int memoryLimit,
+                    bool forceTruncal)
 {
-  ClusterIlpAlg solver(R, k, alpha, statType);
+  ClusterIlpAlg solver(R, k, alpha, statType, forceTruncal);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -171,9 +173,10 @@ Solution runHardCluster(const ReadMatrix& R,
                         const std::string& outputPrefix,
                         const BoolTensor& prevSolution,
                         bool verbose,
-                        int memoryLimit)
+                        int memoryLimit,
+                        bool forceTruncal)
 {
-  HardClusterIlpAlg solver(R, k, nrSegments, statType);
+  HardClusterIlpAlg solver(R, k, nrSegments, statType, forceTruncal);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -212,7 +215,7 @@ int getNrParameters(const ReadMatrix& R,
     case 3:
     case 4:
       {
-        Solver solver(R, k, 0, statType);
+        Solver solver(R, k, 0, statType, false);
         solver.init();
         
         for (int i = 0; i < R.getNrCharacters(); ++i)
@@ -244,7 +247,8 @@ Solution run(const ReadMatrix& R,
              bool verbose,
              int downsampleSNVs,
              int globalTimeLimit,
-             int memoryLimit)
+             int memoryLimit,
+             bool forceTruncal)
 {
   switch (method)
   {
@@ -259,21 +263,24 @@ Solution run(const ReadMatrix& R,
                    prevSolution,
                    verbose, downsampleSNVs,
                    globalTimeLimit,
-                   memoryLimit);
+                   memoryLimit,
+                   forceTruncal);
     case 3:
       return runCluster(R, statType, k, alpha,
                         nrThreads, timeLimit,
                         outputPrefix,
                         prevSolution,
                         verbose,
-                        memoryLimit);
+                        memoryLimit,
+                        forceTruncal);
     case 4:
       return runHardCluster(R, statType, k,
                             nrSegments, nrThreads,
                             timeLimit, outputPrefix,
                             prevSolution,
                             verbose,
-                            memoryLimit);
+                            memoryLimit,
+                            forceTruncal);
     case 5:
       return runEM(R, statType, k,
                    nrSegments, seed,
@@ -283,7 +290,8 @@ Solution run(const ReadMatrix& R,
                    prevSolution,
                    verbose, downsampleSNVs,
                    globalTimeLimit,
-                   memoryLimit);
+                   memoryLimit,
+                   forceTruncal);
     default:
       std::cerr << "Error: invalid method" << std::endl;
       return std::make_pair(-std::numeric_limits<double>::max(), BoolTensor());
@@ -310,11 +318,13 @@ int main(int argc, char** argv)
   int memoryLimit = -1;
   int clusterStatistic = 1;
   std::string stateTreeFilename;
+  bool forceTruncal;
 
   lemon::ArgParser ap(argc, argv);
   ap.refOption("s", "Random number generator seed (default: 0)", seed)
     .refOption("a", "Confidence interval (CI) width used for hard clustering with CI (default: 0.25)", alpha)
     .refOption("bic", "Use Bayesian Information Criterion for model selection of #clusters", bic)
+    .refOption("truncal", "Force the presence of a dominant truncal cluster in the solution", forceTruncal)
     .refOption("d", "Downsample SNVs for EM initialization (default: 25)", downsampleSNVs)
     .refOption("min_k", "Specify minimum number of clusters (only used in BIC mode, default: -1 => let ILP decide)", min_k)
     .refOption("C", "Clustering statistic:\n" \
@@ -396,7 +406,7 @@ int main(int argc, char** argv)
     int minK = 0;
     if (min_k == -1)
     {
-      MinClusterIlpAlg minCluster(R, k, Solver::CLUSTER_DCF);
+      MinClusterIlpAlg minCluster(R, k, statType, forceTruncal);
       minCluster.init();
       minCluster.solve(nrThreads, timeLimit);
       minK = minCluster.getMinK();
@@ -420,7 +430,7 @@ int main(int argc, char** argv)
                          nrRestarts, outputPrefix,
                          method, alpha, initY, verbose,
                          downsampleSNVs, localTimeLimit,
-                         memoryLimit);
+                         memoryLimit, forceTruncal);
       initY = sol.second;
       int nrParameters = getNrParameters(R, statType, kk, method);
       double b = log(nrObservations) * nrParameters - 2 * sol.first;
@@ -437,7 +447,7 @@ int main(int argc, char** argv)
                        nrRestarts, outputPrefix,
                        method, alpha, BoolTensor(), verbose,
                        downsampleSNVs, globalTimeLimit,
-                       memoryLimit);
+                       memoryLimit, forceTruncal);
     std::cerr << "Log likelihood " << sol.first << std::endl;
   }
 

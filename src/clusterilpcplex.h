@@ -21,10 +21,12 @@ public:
   /// @param k Number of clusters
   /// @param alpha Confidence interval width
   /// @param statType Summary statistic to use for clustering
+  /// @param forceTruncal Force the presence of a dominant truncal cluster
   ClusterIlpCplex(const ReadMatrix& R,
                   int k,
                   double alpha,
-                  ClusterStatisticType statType);
+                  ClusterStatisticType statType,
+                  bool forceTruncal);
   
   /// Export ILP
   ///

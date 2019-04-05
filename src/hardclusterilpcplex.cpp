@@ -10,8 +10,9 @@
 HardClusterIlpCplex::HardClusterIlpCplex(const ReadMatrix& R,
                                          int k,
                                          int nrSegments,
-                                         ClusterStatisticType statType)
-  : HardClusterIlp(R, k, nrSegments, statType)
+                                         ClusterStatisticType statType,
+                                         bool forceTruncal)
+  : HardClusterIlp(R, k, nrSegments, statType, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)
@@ -263,6 +264,7 @@ void HardClusterIlpCplex::initConstraints()
     sum3.clear();
   }
   
+  // Cluster sizes are nonincreasing
   for (int i = 0; i < n; ++i)
   {
     for (int t = 0; t < _scriptT[i].size(); ++t)
@@ -270,7 +272,6 @@ void HardClusterIlpCplex::initConstraints()
       sum += _y[i][t][0];
     }
   }
-  
   for (int j = 1; j < _k; ++j)
   {
     for (int i = 0; i < n; ++i)
@@ -285,6 +286,19 @@ void HardClusterIlpCplex::initConstraints()
     sum2.clear();
   }
   sum.clear();
+  
+  
+  if (_forceTruncal)
+  {
+    // Cluster 0 has largest DCF in all samples
+    for (int j = 1; j < _k; ++j)
+    {
+      for (int p = 0; p < m; ++p)
+      {
+        _model.add(_d[j][p] <= _d[0][p]);
+      }
+    }
+  }
   
   sum.end();
   sum2.end();

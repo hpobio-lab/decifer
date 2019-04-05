@@ -18,9 +18,11 @@ public:
   /// @param R Read matrix
   /// @param kMax Number of clusters
   /// @param statType Summary statistic to use for clustering
+  /// @param forceTruncal Force the presence of a dominant truncal cluster
   MinClusterIlp(const ReadMatrix& R,
                 int kMax,
-                ClusterStatisticType statType);
+                ClusterStatisticType statType,
+                bool forceTruncal);
   
   /// Destructor
   virtual ~MinClusterIlp()
