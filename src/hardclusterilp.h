@@ -23,11 +23,13 @@ public:
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
   /// @param statType Summary statistic to use for clustering
+  /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
   HardClusterIlp(const ReadMatrix& R,
                  int k,
                  int nrSegments,
                  ClusterStatisticType statType,
+                 double precisionBetaBin,
                  bool forceTruncal);
   
   /// Destructor

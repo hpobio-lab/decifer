@@ -21,11 +21,13 @@ public:
   /// @param k Number of clusters
   /// @param alpha Confidence interval width
   /// @param statType Summary statistic to use for clustering
+  /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
   ClusterIlpCplex(const ReadMatrix& R,
                   int k,
                   double alpha,
                   ClusterStatisticType statType,
+                  double precisionBetaBin,
                   bool forceTruncal);
   
   /// Export ILP

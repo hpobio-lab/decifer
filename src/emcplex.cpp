@@ -11,8 +11,9 @@ EMCplex::EMCplex(const ReadMatrix& R,
                  int k,
                  int nrSegments,
                  ClusterStatisticType statType,
+                 double precisionBetaBin,
                  bool forceTruncal)
-  : EM(R, k, nrSegments, statType, forceTruncal)
+  : EM(R, k, nrSegments, statType, precisionBetaBin, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)

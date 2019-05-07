@@ -18,10 +18,12 @@ public:
   /// @param R Read matrix
   /// @param kMax Number of clusters
   /// @param statType Summary statistic to use for clustering
+  /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
   MinClusterIlp(const ReadMatrix& R,
                 int kMax,
                 ClusterStatisticType statType,
+                double precisionBetaBin,
                 bool forceTruncal);
   
   /// Destructor

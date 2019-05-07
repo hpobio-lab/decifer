@@ -13,11 +13,13 @@ Solver::Solver(const ReadMatrix& R,
                int k,
                int nrSegments,
                ClusterStatisticType statType,
+               double precisionBetaBin,
                bool forceTruncal)
   : _R(R)
   , _k(k)
   , _nrSegments(nrSegments)
   , _statType(statType)
+  , _precisionBetaBin(precisionBetaBin)
   , _forceTruncal(forceTruncal)
   , _logFactorial(1, 0)
   , _scriptT(R.getNrCharacters())
@@ -98,17 +100,18 @@ void Solver::initPWLA()
               _x[i][t][j][p][l] = g_tol.epsilon();
             }
             double h = (_x[i][t][j][p][l] - _numerator[i][t][p]) / _denominator[i][p];
-            if (h <= 0)
+            if (h <= 0 || !g_tol.nonZero(h))
             {
               h = g_tol.epsilon();
             }
-            if (h >= 1)
+            if (h >= 1 || g_tol.less(1, h))
             {
               h = 1 - g_tol.epsilon();
             }
             
             assert(0 <= h && h <= 1);
-            _hatG[i][t][j][p][l] = _logBinomCoeff[p][i] + var_ip * log(h) + ref_ip * log(1-h);
+            _hatG[i][t][j][p][l] = getLogLikelihood(var_ip, ref_ip, h);
+            
             assert(!isnan(_hatG[i][t][j][p][l]));
           }
         }
@@ -401,6 +404,17 @@ void Solver::init(int i)
       {
         _dUB[i][t][p] = _dLB[i][t][p];
       }
+      
+      const double h_lb = (_dLB[i][t][p] - _numerator[i][t][p]) / _denominator[i][p];
+      if ((h_lb <= 0 || !g_tol.nonZero(h_lb)) && _R.getVar(p, i) != 0)
+      {
+        _dLB[i][t][p] += 1e-2;
+      }
+      const double h_ub = (_dUB[i][t][p] - _numerator[i][t][p]) / _denominator[i][p];
+      if ((h_ub >= 1 || g_tol.less(1, h_ub)) && _R.getRef(p, i) != 0)
+      {
+        _dUB[i][t][p] -= 1e-2;
+      }
     }
   }
   
@@ -426,6 +440,30 @@ void Solver::init()
   return;
 }
 
+double Solver::getLogLikelihood(int var, int ref, double f) const
+{
+  if (!g_tol.nonZero(f) && var == 0)
+  {
+    return 0;
+  }
+  if (!g_tol.different(1, f) && ref == 0)
+  {
+    return 0;
+  }
+  
+  if (_precisionBetaBin > 0)
+  {
+    double val = lgamma(var + ref + 1) + lgamma(var + _precisionBetaBin * f) + lgamma(ref + _precisionBetaBin * (1-f)) + lgamma(_precisionBetaBin);
+    val -= (lgamma(var + 1) + lgamma(ref + 1) + lgamma(var + ref + _precisionBetaBin) + lgamma(_precisionBetaBin*f) + lgamma(_precisionBetaBin*(1-f)));
+    
+    return val;
+  }
+  else
+  {
+    return lgamma(var + ref + 1) - lgamma(var + 1) - lgamma(ref + 1) + var * log(f) + ref * log(1 - f);
+  }
+}
+
 double Solver::getLogLikelihood(int i) const
 {
   const int n = _R.getNrCharacters();
@@ -443,7 +481,11 @@ double Solver::getLogLikelihood(int i) const
     const StateEdgeSet& T_it = scriptT_i[t];
     for (int j = 0; j < _k; ++j)
     {
+      if (_solPi[j] == 0)
+        continue;
+      
       double prod = _solPi[j] / size_scriptT_i;
+      double log_prod = log(prod);
       for (int p = 0; p < m; ++p)
       {
         const ReadMatrix::CopyNumberStateVector& cnStates_pi = _R.getCopyNumberStates(p, i);
@@ -458,27 +500,17 @@ double Solver::getLogLikelihood(int i) const
         {
           const double h = (_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p];
           assert(_denominator[i][p] != 0);
-          if (h <= 0 || h >= 1)
+          if (!((!(h <= 0 || !g_tol.nonZero(h)) || var_pi == 0) && (!(h >= 1 || g_tol.less(1, h)) || ref_pi == 0)))
           {
-            if (h <= 0 && var_pi == 0)
-            {
-              prod *= exp(_logBinomCoeff[p][i]);
-            }
-            else if (h >= 1 && ref_pi == 0)
-            {
-              prod *= exp(_logBinomCoeff[p][i]);
-            }
-            else
-            {
-              prod = 0;
-              break;
-            }
+            prod = 0;
+            break;
           }
           else
           {
-            const double val = _logBinomCoeff[p][i] + var_pi * log(h) + ref_pi * log(1 - h);
-            prod *= exp(val);
-            prod = std::max(std::numeric_limits<double>::min(), prod);
+            const double val = getLogLikelihood(var_pi, ref_pi, h);
+            log_prod += val;
+//            prod *= exp(val);
+//            prod = std::max(std::numeric_limits<double>::min(), prod);
           }
         }
         else
@@ -487,7 +519,13 @@ double Solver::getLogLikelihood(int i) const
           break;
         }
       }
-      sum_i += prod;
+      if (prod != 0)
+      {
+        //sum_i += prod;
+        prod = exp(log_prod);
+        prod = std::max(std::numeric_limits<double>::min(), prod);
+        sum_i += prod;
+      }
     }
   }
   return log(sum_i);
@@ -504,7 +542,7 @@ double Solver::updateLogLikelihood()
   {
     double L_i = getLogLikelihood(i);
     _logLikelihood += L_i;
-//    std::cout << i << ": " << L_i << std::endl;
+    std::cout << i << ": " << L_i << std::endl;
   }
 //  std::cout << std::endl;
   

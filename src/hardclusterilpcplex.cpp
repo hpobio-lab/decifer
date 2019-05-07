@@ -11,8 +11,9 @@ HardClusterIlpCplex::HardClusterIlpCplex(const ReadMatrix& R,
                                          int k,
                                          int nrSegments,
                                          ClusterStatisticType statType,
+                                         double precisionBetaBin,
                                          bool forceTruncal)
-  : HardClusterIlp(R, k, nrSegments, statType, forceTruncal)
+  : HardClusterIlp(R, k, nrSegments, statType, precisionBetaBin, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)
@@ -265,27 +266,31 @@ void HardClusterIlpCplex::initConstraints()
   }
   
   // Cluster sizes are nonincreasing
-  for (int i = 0; i < n; ++i)
-  {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
-    {
-      sum += _y[i][t][0];
-    }
-  }
+//  for (int i = 0; i < n; ++i)
+//  {
+//    for (int t = 0; t < _scriptT[i].size(); ++t)
+//    {
+//      sum += _y[i][t][0];
+//    }
+//  }
+//  for (int j = 1; j < _k; ++j)
+//  {
+//    for (int i = 0; i < n; ++i)
+//    {
+//      for (int t = 0; t < _scriptT[i].size(); ++t)
+//      {
+//        sum2 += _y[i][t][j];
+//      }
+//    }
+//    _model.add(sum >= sum2);
+//    sum = sum2;
+//    sum2.clear();
+//  }
+//  sum.clear();
   for (int j = 1; j < _k; ++j)
   {
-    for (int i = 0; i < n; ++i)
-    {
-      for (int t = 0; t < _scriptT[i].size(); ++t)
-      {
-        sum2 += _y[i][t][j];
-      }
-    }
-    _model.add(sum >= sum2);
-    sum = sum2;
-    sum2.clear();
+    _model.add(_d[j][0] <= _d[j-1][0]);
   }
-  sum.clear();
   
   
   if (_forceTruncal)

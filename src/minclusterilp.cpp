@@ -10,8 +10,9 @@
 MinClusterIlp::MinClusterIlp(const ReadMatrix& R,
                              int kMax,
                              ClusterStatisticType statType,
+                             double precisionBetaBin,
                              bool forceTruncal)
-  : Solver(R, kMax, 0, statType, forceTruncal)
+  : Solver(R, kMax, 0, statType, precisionBetaBin, forceTruncal)
   , _solMinK(0)
 {
 }

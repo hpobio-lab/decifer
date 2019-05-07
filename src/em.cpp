@@ -16,8 +16,9 @@ EM::EM(const ReadMatrix& R,
        int k,
        int nrSegments,
        ClusterStatisticType statType,
+       double precisionBetaBin,
        bool forceTruncal)
-  : Solver(R, k, nrSegments, statType, forceTruncal)
+  : Solver(R, k, nrSegments, statType, precisionBetaBin, forceTruncal)
   , _gamma(R.getNrCharacters())
   , _solT()
   , _initY()
@@ -129,7 +130,7 @@ void EM::initPWLA()
       }
     }
   }
-  
+
   // initialize segments
   for (int i = 0; i < n; ++i)
   {
@@ -157,17 +158,17 @@ void EM::initPWLA()
                 _x[i][t][j][p][l] = g_tol.epsilon();
               }
               double h = (_x[i][t][j][p][l] - _numerator[i][t][p]) / _denominator[i][p];
-              if (h <= 0)
+              if (h <= 0 || !g_tol.nonZero(h))
               {
                 h = g_tol.epsilon();
               }
-              if (h >= 1)
+              if (h >= 1 || g_tol.less(1, h))
               {
                 h = 1 - g_tol.epsilon();
               }
               
               assert(0 <= h && h <= 1);
-              _hatG[i][t][j][p][l] = _logBinomCoeff[p][i] + var_ip * log(h) + ref_ip * log(1-h);
+              _hatG[i][t][j][p][l] = getLogLikelihood(var_ip, ref_ip, h);
               assert(!isnan(_hatG[i][t][j][p][l]));
             }
           }
@@ -290,7 +291,8 @@ bool EM::initializeD(int seed,
   return true;
 }
 
-bool EM::solve(int seed,
+bool EM::solve(int restart,
+               int seed,
                int maxIterations,
                int nrThreads,
                int timeLimit,
@@ -305,7 +307,7 @@ bool EM::solve(int seed,
   initializeD(seed, nrThreads, timeLimit, verbose, nrDownSampledSNVs, memoryLimit);
   
   updateLogLikelihood();
-  std::cerr << "k == " << _k << " -- Iteration = 0" << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
+  std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = 0" << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
   
   int step = 0;
   while (true)
@@ -313,12 +315,12 @@ bool EM::solve(int seed,
     stepE();
     if (!stepM(nrThreads, verbose))
     {
-      std::cerr << "k == " << _k << " -- Iteration = " << ++step << " -- infeasible solution! " << " -- " << timer.realTime() << " s" << std::endl;
+      std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = " << ++step << " -- infeasible solution! " << " -- " << timer.realTime() << " s" << std::endl;
       return false;
     }
     
     double delta = updateLogLikelihood();
-    std::cerr << "k == " << _k << " -- Iteration = " << ++step << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
+    std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = " << ++step << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
     if (!g_tol.nonZero(delta))
     {
       break;
@@ -465,25 +467,14 @@ void EM::stepE()
           {
             const double h = (_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p];
             assert(_denominator[i][p] != 0);
-            if (h <= 0 || h >= 1)
+            if (!((!(h <= 0 || !g_tol.nonZero(h)) || var_pi == 0) && (!(h >= 1 || g_tol.less(1, h)) || ref_pi == 0)))
             {
-              if (h <= 0 && var_pi == 0)
-              {
-                prod *= exp(_logBinomCoeff[p][i]);
-              }
-              else if (h >= 1 && ref_pi == 0)
-              {
-                prod *= exp(_logBinomCoeff[p][i]);
-              }
-              else
-              {
-                prod = 0;
-                break;
-              }
+              prod = 0;
+              break;
             }
             else
             {
-              const double val = _logBinomCoeff[p][i] + var_pi * log(h) + ref_pi * log(1 - h);
+              const double val = getLogLikelihood(var_pi, ref_pi, h);
               prod *= exp(val);
               prod = std::max(std::numeric_limits<double>::min(), prod);
             }

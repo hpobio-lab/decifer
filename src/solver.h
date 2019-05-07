@@ -28,11 +28,13 @@ public:
   /// @param k Number of clusters
   /// @param nrSegments Number of segments for piecewise linear approximation
   /// @param statType Summary statistic to use for clustering
+  /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
   Solver(const ReadMatrix& R,
          int k,
          int nrSegments,
          ClusterStatisticType statType,
+         double precisionBetaBin,
          bool forceTruncal);
   
   /// Destructor
@@ -133,6 +135,13 @@ public:
   /// @param i SNV
   double getLogLikelihood(int i) const;
   
+  /// Compute SNV log likelihood
+  ///
+  /// @param var Number of variant reads
+  /// @param ref Number of reference reads
+  /// @param f SNV fraction
+  double getLogLikelihood(int var, int ref, double f) const;
+  
 protected:
   typedef ReadMatrix::CopyNumberStateVector CopyNumberStateVector;
   typedef std::vector<IntPair> IntPairVector;
@@ -199,6 +208,8 @@ protected:
   const int _nrSegments;
   /// Summary statistic to use for clustering
   const ClusterStatisticType _statType;
+  /// Precision parameter for beta binomial
+  const double _precisionBetaBin;
   /// Force the presence of a dominant truncal cluster
   const bool _forceTruncal;
   /// Log factorial look-up table

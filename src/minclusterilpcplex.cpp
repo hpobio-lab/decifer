@@ -10,8 +10,9 @@
 MinClusterIlpCplex::MinClusterIlpCplex(const ReadMatrix& R,
                                        int kMax,
                                        ClusterStatisticType statType,
+                                       double precisionBetaBin,
                                        bool forceTruncal)
-  : MinClusterIlp(R, kMax, statType, forceTruncal)
+  : MinClusterIlp(R, kMax, statType, precisionBetaBin, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)

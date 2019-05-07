@@ -175,7 +175,11 @@ if (CPLEX)
     src/hardclusterilpcplex.cpp
     src/clusterilp.cpp
     src/clusterilpcplex.cpp
-    src/clusterilpcplexcallback.cpp
+    src/softclusterilpcplexcallback.cpp
+    src/softclusterilp.cpp
+    src/softclusterilpcplex.cpp
+    src/softclusterlpcplex.cpp
+    src/softclusterlpcplexext.cpp
     src/statetree.cpp
     src/stategraph.cpp
     src/readmatrix.cpp
@@ -196,7 +200,12 @@ if (CPLEX)
     src/hardclusterilpcplex.h
     src/clusterilp.h
     src/clusterilpcplex.h
-#    src/clusterilpcplexcallback.h
+    src/softclusterilp.h
+    src/softclusterilpcplex.h
+    src/softclusterilpcplexcallback.h
+    src/softclusterlpcplexcallback.h
+    src/softclusterlpcplex.h
+    src/softclusterlpcplexext.h
     src/stategraph.h
     src/readmatrix.h
     src/basematrix.h
@@ -216,6 +225,7 @@ else()
     src/hardclusterilpgurobi.cpp
     src/clusterilp.cpp
     src/clusterilpgurobi.cpp
+    src/softclusterlp.cpp
     src/statetree.cpp
     src/stategraph.cpp
     src/readmatrix.cpp
@@ -236,6 +246,7 @@ else()
     src/hardclusterilpgurobi.h
     src/clusterilp.h
     src/clusterilpgurobi.h
+    src/softclusterlp.h
     src/stategraph.h
     src/readmatrix.h
     src/basematrix.h

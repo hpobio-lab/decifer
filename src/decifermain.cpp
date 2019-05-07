@@ -12,9 +12,14 @@
 
 #ifdef CPLEX
   #include "emcplex.h"
+  #include "softclusterilpcplex.h"
+  #include "softclusterlpcplex.h"
+  #include "softclusterlpcplexext.h"
   typedef EMCplex EMAlg;
   typedef ClusterIlpCplex ClusterIlpAlg;
   typedef HardClusterIlpCplex HardClusterIlpAlg;
+  typedef SoftClusterIlpCplex SoftClusterIlpAlg;
+  typedef SoftClusterLpCplex SoftClusterLpAlg;
 
   #include "minclusterilpcplex.h"
   typedef MinClusterIlpCplex MinClusterIlpAlg;
@@ -46,7 +51,8 @@ Solution runEM(const ReadMatrix& R,
                int downsampleSNVs,
                int localTimeLimit,
                int memoryLimit,
-               bool forceTruncal)
+               bool forceTruncal,
+               double betaBin)
 {
   int new_seed = seed;
   if (method == 1)
@@ -82,11 +88,12 @@ Solution runEM(const ReadMatrix& R,
         break;
       }
       
-      EMAlg em(R, k, nrSegments, statType, forceTruncal);
+      EMAlg em(R, k, nrSegments, statType, betaBin, forceTruncal);
       em.init();
       em.initHotStart(initY);
       g_rng.seed(seed + rr);
-      if (em.solve(new_seed,
+      if (em.solve(rr,
+                   new_seed,
                    maxIterations,
                    nrThreads,
                    timeLimit,
@@ -138,9 +145,10 @@ Solution runCluster(const ReadMatrix& R,
                     const BoolTensor& prevSolution,
                     bool verbose,
                     int memoryLimit,
-                    bool forceTruncal)
+                    bool forceTruncal,
+                    double betaBin)
 {
-  ClusterIlpAlg solver(R, k, alpha, statType, forceTruncal);
+  ClusterIlpAlg solver(R, k, alpha, statType, betaBin, forceTruncal);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -164,6 +172,43 @@ Solution runCluster(const ReadMatrix& R,
   return std::make_pair(logLikelihood, solver.getSolY());
 }
 
+Solution runSoftCluster(const ReadMatrix& R,
+                        const Solver::ClusterStatisticType statType,
+                        int k,
+                        int nrSegments,
+                        int nrThreads,
+                        int timeLimit,
+                        const std::string& outputPrefix,
+                        const BoolTensor& prevSolution,
+                        bool verbose,
+                        int memoryLimit,
+                        bool forceTruncal,
+                        double betaBin)
+{
+  SoftClusterLpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal, true);
+  solver.init();
+  solver.initHotStart(prevSolution);
+  
+  double logLikelihood = -std::numeric_limits<double>::max();
+  if (solver.solve(nrThreads, timeLimit, verbose, memoryLimit))
+  {
+    char buf[1024];
+    snprintf(buf, 1024, "%s_k%d", outputPrefix.c_str(), k);
+    
+    std::ofstream outSNV((std::string(buf) + ".SNV.tsv").c_str());
+    solver.writeMutationProperties(outSNV);
+    outSNV.close();
+    
+    std::ofstream outT((std::string(buf) + ".T.res").c_str());
+    outT << solver.getPosteriorStateTrees();
+    outT.close();
+    
+    logLikelihood = solver.getLogLikelihood();
+  }
+  
+  return std::make_pair(logLikelihood, BoolTensor());
+}
+
 Solution runHardCluster(const ReadMatrix& R,
                         const Solver::ClusterStatisticType statType,
                         int k,
@@ -174,9 +219,10 @@ Solution runHardCluster(const ReadMatrix& R,
                         const BoolTensor& prevSolution,
                         bool verbose,
                         int memoryLimit,
-                        bool forceTruncal)
+                        bool forceTruncal,
+                        double betaBin)
 {
-  HardClusterIlpAlg solver(R, k, nrSegments, statType, forceTruncal);
+  HardClusterIlpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -203,7 +249,8 @@ Solution runHardCluster(const ReadMatrix& R,
 int getNrParameters(const ReadMatrix& R,
                     const Solver::ClusterStatisticType statType,
                     int k,
-                    int method)
+                    int method,
+                    double betaBin)
 {
   int res = R.getNrSamples() * (k+1);
   switch (method)
@@ -211,11 +258,12 @@ int getNrParameters(const ReadMatrix& R,
     case 0:
     case 1:
     case 2:
+    case 6:
       break;
     case 3:
     case 4:
       {
-        Solver solver(R, k, 0, statType, false);
+        Solver solver(R, k, 0, statType, betaBin, false);
         solver.init();
         
         for (int i = 0; i < R.getNrCharacters(); ++i)
@@ -248,7 +296,8 @@ Solution run(const ReadMatrix& R,
              int downsampleSNVs,
              int globalTimeLimit,
              int memoryLimit,
-             bool forceTruncal)
+             bool forceTruncal,
+             double betaBin)
 {
   switch (method)
   {
@@ -264,7 +313,8 @@ Solution run(const ReadMatrix& R,
                    verbose, downsampleSNVs,
                    globalTimeLimit,
                    memoryLimit,
-                   forceTruncal);
+                   forceTruncal,
+                   betaBin);
     case 3:
       return runCluster(R, statType, k, alpha,
                         nrThreads, timeLimit,
@@ -272,7 +322,8 @@ Solution run(const ReadMatrix& R,
                         prevSolution,
                         verbose,
                         memoryLimit,
-                        forceTruncal);
+                        forceTruncal,
+                        betaBin);
     case 4:
       return runHardCluster(R, statType, k,
                             nrSegments, nrThreads,
@@ -280,7 +331,8 @@ Solution run(const ReadMatrix& R,
                             prevSolution,
                             verbose,
                             memoryLimit,
-                            forceTruncal);
+                            forceTruncal,
+                            betaBin);
     case 5:
       return runEM(R, statType, k,
                    nrSegments, seed,
@@ -291,7 +343,17 @@ Solution run(const ReadMatrix& R,
                    verbose, downsampleSNVs,
                    globalTimeLimit,
                    memoryLimit,
-                   forceTruncal);
+                   forceTruncal,
+                   betaBin);
+    case 6:
+      return runSoftCluster(R, statType, k,
+                            nrSegments, nrThreads,
+                            timeLimit, outputPrefix,
+                            prevSolution,
+                            verbose,
+                            memoryLimit,
+                            forceTruncal,
+                            betaBin);
     default:
       std::cerr << "Error: invalid method" << std::endl;
       return std::make_pair(-std::numeric_limits<double>::max(), BoolTensor());
@@ -305,7 +367,7 @@ int main(int argc, char** argv)
   int min_k = -1;
   int globalTimeLimit = -1;
   int k = -1;
-  int nrSegments = 10;
+  int nrSegments = 50;
   int nrRestarts = 10;
   int maxIterations = 50;
   int nrThreads = -1;
@@ -318,6 +380,7 @@ int main(int argc, char** argv)
   int memoryLimit = -1;
   int clusterStatistic = 1;
   std::string stateTreeFilename;
+  double precisionBetaBin = -1;
   bool forceTruncal;
 
   lemon::ArgParser ap(argc, argv);
@@ -327,13 +390,14 @@ int main(int argc, char** argv)
     .refOption("truncal", "Force the presence of a dominant truncal cluster in the solution", forceTruncal)
     .refOption("d", "Downsample SNVs for EM initialization (default: 25)", downsampleSNVs)
     .refOption("min_k", "Specify minimum number of clusters (only used in BIC mode, default: -1 => let ILP decide)", min_k)
+    .refOption("betaBin", "Beta binomial precision parameter (default: -1, binomial model)", precisionBetaBin)
     .refOption("C", "Clustering statistic:\n" \
                     "     0 -- Cancer Cell Fraction (CCF)\n" \
                     "     1 -- Descendant Cell Fraction (DCF, default)", clusterStatistic)
     .refOption("m", "Clustering method:\n" \
                     "     0 -- Expectation-Maximization using copy-neutral SNV k-Means initialization\n" \
                     "     1 -- Expectation-Maximization using hard clustering with confidence intervals\n" \
-                    "     2 -- Expectation-Maximization using hard clustering with probabilistic likelihood function\n" \
+                    "     2 -- Expectation-Maximization using hard clustering with probabilistic likelihood function (default)\n" \
                     "     3 -- Hard clustering with confidence intervals\n" \
                     "     4 -- Hard clustering with probabilistic likelihood function\n" \
                     "     5 -- Expectation-Maximization using hard clustering with distance-based likelihood function", method, false)
@@ -342,7 +406,7 @@ int main(int argc, char** argv)
     .refOption("t", "Number of threads (default: -1, limited by CPU)", nrThreads)
     .refOption("tl", "Time limit in seconds (default: -1, unlimited)", timeLimit)
     .refOption("TL", "Global time limit in seconds (default: -1, unlimited)", globalTimeLimit)
-    .refOption("N", "Number of segments (default: 10)", nrSegments, false)
+    .refOption("N", "Number of segments (default: 50)", nrSegments, false)
     .refOption("r", "Number of restarts (default: 10)", nrRestarts, false)
     .refOption("o", "Output prefix (default: './output')", outputPrefix)
     .refOption("v", "Verbose (default: 0)", verbose, false)
@@ -386,27 +450,64 @@ int main(int argc, char** argv)
   }
   inR.close();
   
+  bool writeStateTrees = false;
   if (!stateTreeFilename.empty())
   {
     std::ifstream inS(stateTreeFilename);
     if (!inS.good())
     {
-      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading" << std::endl;
-      return 1;
+      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading. Will generate state tree file." << std::endl;
+      writeStateTrees = true;
     }
-    
-    StateGraph::readStateTrees(inS);
+    else
+    {
+      StateGraph::readStateTrees(inS);
+    }
   }
+  
+  std::cerr << "Arguments:";
+  for (int i = 1; i < argc; ++i)
+  {
+    std::cerr << " " << argv[i];
+  }
+  std::cerr << std::endl;
+  std::cerr << "Input:     instance with n = " << R.getNrCharacters() << " SNVs and m = " << R.getNrSamples() << " samples" << std::endl;
+  std::cerr << "Algorithm: ";
+  switch (method)
+  {
+    case 0:
+      std::cerr << "Expectation-Maximization using copy-neutral SNV k-Means initialization";
+      break;
+    case 1:
+      std::cerr << "Expectation-Maximization using hard clustering with confidence intervals";
+      break;
+    case 2:
+      std::cerr << "Expectation-Maximization using hard clustering with probabilistic likelihood function";
+      break;
+    case 3:
+      std::cerr << "Hard clustering with confidence intervals";
+      break;
+    case 4:
+      std::cerr << "Hard clustering with probabilistic likelihood function";
+      break;
+    case 5:
+      std::cerr << "Expectation-Maximization using hard clustering with distance-based likelihood function";
+      break;
+    case 6:
+      std::cerr << "Exact EM algorithm";
+      break;
+  }
+  std::cerr << std::endl;
   
   if (bic)
   {
     int nrObservations = R.getNumberOfObservations();
-    std::cerr << "#Observations: " << nrObservations << std::endl;
+    std::cerr << "Using BIC -- #Observations: " << nrObservations << std::endl;
     
     int minK = 0;
     if (min_k == -1)
     {
-      MinClusterIlpAlg minCluster(R, k, statType, forceTruncal);
+      MinClusterIlpAlg minCluster(R, k, statType, forceTruncal, precisionBetaBin);
       minCluster.init();
       minCluster.solve(nrThreads, timeLimit);
       minK = minCluster.getMinK();
@@ -430,9 +531,9 @@ int main(int argc, char** argv)
                          nrRestarts, outputPrefix,
                          method, alpha, initY, verbose,
                          downsampleSNVs, localTimeLimit,
-                         memoryLimit, forceTruncal);
+                         memoryLimit, forceTruncal, precisionBetaBin);
       initY = sol.second;
-      int nrParameters = getNrParameters(R, statType, kk, method);
+      int nrParameters = getNrParameters(R, statType, kk, method, precisionBetaBin);
       double b = log(nrObservations) * nrParameters - 2 * sol.first;
       std::cerr << "k = " << kk << " -- Log likelihood " << sol.first << " -- BIC " << b << std::endl;
       outBIC << kk << "\t" << sol.first << "\t" << nrObservations << "\t" << nrParameters << "\t" << b << std::endl;
@@ -447,8 +548,16 @@ int main(int argc, char** argv)
                        nrRestarts, outputPrefix,
                        method, alpha, BoolTensor(), verbose,
                        downsampleSNVs, globalTimeLimit,
-                       memoryLimit, forceTruncal);
+                       memoryLimit, forceTruncal,
+                       precisionBetaBin);
     std::cerr << "Log likelihood " << sol.first << std::endl;
+  }
+  
+  if (writeStateTrees)
+  {
+    std::ofstream outS(stateTreeFilename);
+    StateGraph::writeStateTrees(outS);
+    outS.close();
   }
 
   return 0;

@@ -12,8 +12,9 @@ ClusterIlpCplex::ClusterIlpCplex(const ReadMatrix& R,
                                  int k,
                                  double alpha,
                                  ClusterStatisticType statType,
+                                 double precisionBetaBin,
                                  bool forceTruncal)
-  : ClusterIlp(R, k, alpha, statType, forceTruncal)
+  : ClusterIlp(R, k, alpha, statType, precisionBetaBin, forceTruncal)
   , _env()
   , _model(_env)
   , _cplex(_model)

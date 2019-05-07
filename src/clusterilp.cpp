@@ -12,8 +12,9 @@ ClusterIlp::ClusterIlp(const ReadMatrix& R,
                        int k,
                        double alpha,
                        ClusterStatisticType statType,
+                       double precisionBetaBin,
                        bool forceTruncal)
-  : Solver(R, k, 0, statType, forceTruncal)
+  : Solver(R, k, 0, statType, precisionBetaBin, forceTruncal)
   , _alpha(alpha)
   , _vafLB()
   , _vafUB()
