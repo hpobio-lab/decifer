@@ -12,14 +12,15 @@ HardClusterIlpCplex::HardClusterIlpCplex(const ReadMatrix& R,
                                          int nrSegments,
                                          ClusterStatisticType statType,
                                          double precisionBetaBin,
-                                         bool forceTruncal)
+                                         bool forceTruncal,
+                                         bool includePi)
   : HardClusterIlp(R, k, nrSegments, statType, precisionBetaBin, forceTruncal)
+  , _includePi(includePi)
   , _env()
   , _model(_env)
   , _cplex(_model)
   , _y()
   , _d()
-  , _yd()
   , _gamma()
   , _lambda()
 {
@@ -107,42 +108,23 @@ void HardClusterIlpCplex::initVariables()
     }
   }
   
-  _yd = IloNumVar4Matrix(_env, n);
-  for (int i = 0; i < n; ++i)
+  if (_includePi)
   {
-    const int size_T_i = _scriptT[i].size();
-    
-    _yd[i] = IloNumVar3Matrix(_env, size_T_i);
-    for (int t = 0; t < size_T_i; ++t)
+    _pi = IloNumVarArray(_env, _k);
+    for (int j = 0; j < _k; ++j)
     {
-      _yd[i][t] = IloNumVarMatrix(_env, _k);
-      for (int j = 0; j < _k; ++j)
-      {
-        _yd[i][t][j] = IloNumVarArray(_env, m);
-        for (int p = 0; p < m; ++p)
-        {
-          snprintf(buf, 1024, "yd;%d;%d;%d;%d", i, t, j, p);
-          _yd[i][t][j][p] = IloNumVar(_env, 0, 1, buf);
-        }
-      }
+      snprintf(buf, 1024, "pi;%d", j);
+      _pi[j] = IloNumVar(_env, 0, n, buf);
     }
-  }
   
-  _gamma = IloNumVar4Matrix(_env, n);
-  for (int i = 0; i < n; ++i)
-  {
-    _gamma[i] = IloNumVar3Matrix(_env, _scriptT[i].size());
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    _gamma = IloNumVarMatrix(_env, _k);
+    for (int j = 0; j < _k; ++j)
     {
-      _gamma[i][t] = IloNumVarMatrix(_env, _k);
-      for (int j = 0; j < _k; ++j)
+      _gamma[j] = IloNumVarArray(_env, _nrSegments);
+      for (int alpha = 0; alpha < _nrSegments; ++alpha)
       {
-        _gamma[i][t][j] = IloNumVarArray(_env, _nrSegments);
-        for (int l = 0; l < _nrSegments; ++l)
-        {
-          snprintf(buf, 1024, "gamma;%d;%d;%d;%d", i, t, j, l);
-          _gamma[i][t][j][l] = IloNumVar(_env, 0, 1, buf);
-        }
+        snprintf(buf, 1024, "gamma;%d;%d", j, alpha);
+        _gamma[j][alpha] = IloNumVar(_env, 0, n, buf);
       }
     }
   }
@@ -166,6 +148,21 @@ void HardClusterIlpCplex::initVariables()
             _lambda[i][t][j][p][l] = IloNumVar(_env, 0, 1, buf);
           }
         }
+      }
+    }
+  }
+  
+  _llambda = IloNumVar3Matrix(_env, _k);
+  for (int j = 0; j < _k; ++j)
+  {
+    _llambda[j] = IloNumVarMatrix(_env, m);
+    for (int p = 0; p < m; ++p)
+    {
+      _llambda[j][p] = IloNumVarArray(_env, _nrSegments);
+      for (int alpha = 0; alpha < _nrSegments; ++alpha)
+      {
+        snprintf(buf, 1024, "llambda;%d;%d;%d", j, p, alpha);
+        _llambda[j][p][alpha] = IloNumVar(_env, 0, 1, buf);
       }
     }
   }
@@ -194,19 +191,49 @@ void HardClusterIlpCplex::initConstraints()
     sum.clear();
   }
   
-  for (int i = 0; i < n; ++i)
+  if (_includePi)
   {
-    const int size_T_i = _scriptT[i].size();
-    for (int t = 0; t < size_T_i; ++t)
+    for (int j = 0; j < _k; ++j)
     {
-      for (int j = 0; j < _k; ++j)
+      for (int i = 0; i < n; ++i)
       {
-        for (int p = 0; p < m; ++p)
+        const int size_T_i = _scriptT[i].size();
+        for (int t = 0; t < size_T_i; ++t)
         {
-          _model.add(_y[i][t][j] * _dLB[i][t][p] <= _yd[i][t][j][p]);
-          _model.add(_yd[i][t][j][p] <= _dUB[i][t][p] * _y[i][t][j]);
+          sum += _y[i][t][j];
         }
       }
+      _model.add(_pi[j] == sum);
+      sum.clear();
+    }
+    
+    for (int j = 0; j < _k; ++j)
+    {
+      for (int alpha = 0; alpha < _nrSegments; ++alpha)
+      {
+        sum += _gamma[j][alpha] * _coordPi[alpha];
+        sum2 += _gamma[j][alpha];
+      }
+      _model.add(sum == _pi[j]);
+      _model.add(sum2 == 1);
+      sum.clear();
+      sum2.clear();
+    }
+  }
+  
+  for (int j = 0; j < _k; ++j)
+  {
+    for (int p = 0; p < m; ++p)
+    {
+      for (int alpha = 0; alpha < _nrSegments; ++alpha)
+      {
+        sum += _llambda[j][p][alpha] * _coord[alpha];
+        sum2 += _llambda[j][p][alpha];
+      }
+      _model.add(sum == _d[j][p]);
+      _model.add(sum2 == 1);
+      sum.clear();
+      sum2.clear();
     }
   }
   
@@ -218,80 +245,33 @@ void HardClusterIlpCplex::initConstraints()
       {
         for (int p = 0; p < m; ++p)
         {
-          _model.add(_yd[i][t][j][p] <= _y[i][t][j]);
-          _model.add(_yd[i][t][j][p] <= _d[j][p]);
-          _model.add(_yd[i][t][j][p] >= _y[i][t][j] + _d[j][p] - 1);
-          for (int l = 0; l < _nrSegments; ++l)
+          for (int alpha = 0; alpha < _nrSegments; ++alpha)
           {
-            sum += _lambda[i][t][j][p][l];
-            sum2 += _lambda[i][t][j][p][l] * _x[i][t][j][p][l];
+            sum += _lambda[i][t][j][p][alpha];
+            _model.add(_llambda[j][p][alpha] >= _lambda[i][t][j][p][alpha]);
           }
           _model.add(sum == _y[i][t][j]);
-          _model.add(sum2 == _yd[i][t][j][p]);
           sum.clear();
-          sum2.clear();
+          
+          for (int alpha = 0; alpha < _nrSegments-1; ++alpha)
+          {
+            if (_coord[alpha] < _dLB[i][t][p] && _coord[alpha + 1] < _dLB[i][t][p])
+            {
+              _model.add(_lambda[i][t][j][p][alpha] == 0);
+            }
+          }
+          
+          for (int alpha = 1; alpha < _nrSegments; ++alpha)
+          {
+            if (_coord[alpha-1] > _dUB[i][t][p] && _coord[alpha] > _dUB[i][t][p])
+            {
+              _model.add(_lambda[i][t][j][p][alpha] == 0);
+            }
+          }
         }
       }
     }
   }
-  
-  IloExpr sum3(_env);
-  for (int j = 0; j < _k; ++j)
-  {
-    for (int ii = 0; ii < n; ++ii)
-    {
-      for (int tt = 0; tt < _scriptT[ii].size(); ++tt)
-      {
-        sum3 += _y[ii][tt][j];
-      }
-    }
-    
-    for (int i = 0; i < n; ++i)
-    {
-      for (int t = 0; t < _scriptT[i].size(); ++t)
-      {
-        for (int l = 0; l < _nrSegments; ++l)
-        {
-          sum += _gamma[i][t][j][l];
-          sum2 += _gamma[i][t][j][l] * _z[l];
-        }
-        _model.add(sum == _y[i][t][j]);
-        _model.add(sum2 <= sum3);
-        _model.add(sum2 <= _y[i][t][j]);
-        sum.clear();
-        sum2.clear();
-      }
-    }
-    sum3.clear();
-  }
-  
-  // Cluster sizes are nonincreasing
-//  for (int i = 0; i < n; ++i)
-//  {
-//    for (int t = 0; t < _scriptT[i].size(); ++t)
-//    {
-//      sum += _y[i][t][0];
-//    }
-//  }
-//  for (int j = 1; j < _k; ++j)
-//  {
-//    for (int i = 0; i < n; ++i)
-//    {
-//      for (int t = 0; t < _scriptT[i].size(); ++t)
-//      {
-//        sum2 += _y[i][t][j];
-//      }
-//    }
-//    _model.add(sum >= sum2);
-//    sum = sum2;
-//    sum2.clear();
-//  }
-//  sum.clear();
-  for (int j = 1; j < _k; ++j)
-  {
-    _model.add(_d[j][0] <= _d[j-1][0]);
-  }
-  
   
   if (_forceTruncal)
   {
@@ -307,7 +287,6 @@ void HardClusterIlpCplex::initConstraints()
   
   sum.end();
   sum2.end();
-  sum3.end();
 }
 
 void HardClusterIlpCplex::initObjective()
@@ -317,27 +296,31 @@ void HardClusterIlpCplex::initObjective()
   
   IloExpr sum(_env);
   
+  if (_includePi)
+  {
+    const double log_n = log(n);
+    for (int j = 0; j < _k; ++j)
+    {
+      for (int alpha = 0; alpha < _nrSegments; ++alpha)
+      {
+        sum += (_hatPi[alpha] - log_n) * _gamma[j][alpha];
+      }
+    }
+  }
+  
   for (int i = 0; i < n; ++i)
   {
     for (int t = 0; t < _scriptT[i].size(); ++t)
     {
       for (int j = 0; j < _k; ++j)
       {
-        for (int l = 0; l < _nrSegments; ++l)
-        {
-          sum += _hatN[l] * _gamma[i][t][j][l];
-        }
-        
         for (int p = 0; p < m; ++p)
         {
-          for (int l = 0; l < _nrSegments; ++l)
+          for (int alpha = 0; alpha < _nrSegments; ++alpha)
           {
-            sum += _hatG[i][t][j][p][l] * _lambda[i][t][j][p][l];
+            sum += _hatG[i][t][j][p][alpha] * _lambda[i][t][j][p][alpha];
           }
         }
-        
-        sum += -_y[i][t][j] * log(n);
-        sum += -_y[i][t][j] * log(_scriptT[i].size());
       }
     }
   }
@@ -416,22 +399,22 @@ bool HardClusterIlpCplex::solve(int nrThreads,
         _solY[i][t][j] = (_cplex.getValue(_y[i][t][j]) >= 0.4);
         if (_solY[i][t][j])
         {
-          double sum = 0;
-          for (int l = 0; l < _nrSegments; ++l)
-          {
-            sum += _hatN[l] * _cplex.getValue(_gamma[i][t][j][l]);
-          }
+//          double sum = 0;
+//          for (int l = 0; l < _nrSegments; ++l)
+//          {
+//            sum += _hatN[l] * _cplex.getValue(_gamma[i][t][j][l]);
+//          }
           
-          for (int p = 0; p < m; ++p)
-          {
-            for (int l = 0; l < _nrSegments; ++l)
-            {
-              sum += _hatG[i][t][j][p][l] * _cplex.getValue(_lambda[i][t][j][p][l]);
-            }
-          }
-          
-          sum += -log(n);
-          sum += -log(_scriptT[i].size());
+//          for (int p = 0; p < m; ++p)
+//          {
+//            for (int l = 0; l < _nrSegments; ++l)
+//            {
+//              sum += _hatG[i][t][j][p][l] * _cplex.getValue(_lambda[i][t][j][p][l]);
+//            }
+//          }
+//
+//          sum += -log(n);
+//          sum += -log(_scriptT[i].size());
           
 //          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
           

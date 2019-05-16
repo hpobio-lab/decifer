@@ -156,6 +156,7 @@ set( generatestatetrees_src
   src/utils.cpp
   src/readmatrix.cpp
   src/basematrix.cpp
+  src/solver.cpp
 )
 
 set( generatestatetrees_hdr
@@ -164,10 +165,12 @@ set( generatestatetrees_hdr
   src/utils.h
   src/readmatrix.h
   src/basematrix.h
+  src/solver.h
 )
 
 if (CPLEX)
   set( decifer_src
+    src/incrementalsolver.cpp
     src/decifermain.cpp
     src/minclusterilp.cpp
     src/minclusterilpcplex.cpp
@@ -192,6 +195,7 @@ if (CPLEX)
   )
 
   set( decifer_hdr
+    src/incrementalsolver.h
     src/utils.h
     src/statetree.h
     src/minclusterilp.h

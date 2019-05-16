@@ -1,20 +1,21 @@
 /*
- * hardclusterilp.h
+ * softclusterilp.h
  *
- *  Created on: 18-oct-2018
+ *  Created on: 13-apr-2019
  *      Author: M. El-Kebir
  */
 
-#ifndef HARDCLUSTERILP_H
-#define HARDCLUSTERILP_H
+#ifndef SOFTCLUSTERILP_H
+#define SOFTCLUSTERILP_H
 
 #include "utils.h"
 #include "readmatrix.h"
 #include "stategraph.h"
+#include "posteriorstatetree.h"
 #include "statetree.h"
 #include "solver.h"
 
-class HardClusterIlp : public Solver
+class SoftClusterIlp : public Solver
 {
 public:
   /// Constructor
@@ -25,7 +26,7 @@ public:
   /// @param statType Summary statistic to use for clustering
   /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
-  HardClusterIlp(const ReadMatrix& R,
+  SoftClusterIlp(const ReadMatrix& R,
                  int k,
                  int nrSegments,
                  ClusterStatisticType statType,
@@ -33,7 +34,7 @@ public:
                  bool forceTruncal);
   
   /// Destructor
-  virtual ~HardClusterIlp()
+  virtual ~SoftClusterIlp()
   {
   };
   
@@ -53,8 +54,8 @@ public:
   /// @param filename Filename
   virtual void exportModel(const std::string& filename) = 0;
   
-  /// Return state trees
-  const StateTreeVector& getStateTrees() const
+  /// Return posterior state trees
+  const PosteriorStateTreeMatrix& getPosteriorStateTrees() const
   {
     return _solT;
   }
@@ -67,12 +68,23 @@ public:
   /// @param y Clustering and state tree assignment
   virtual void initHotStart(const BoolTensor& y) = 0;
   
-  const BoolTensor& getSolY() const
+  const DoubleTensor& getSolY() const
   {
     return _solY;
   }
   
+  /// Initialize DCF constraints
+  virtual void initConstraintsDCF(const DoubleMatrix& d,
+                                  int multiplicity)
+  {
+  };
+  
 protected:
+  typedef std::vector<Double5Matrix> Double6Matrix;
+  
+  /// Initialize piecewise linear approximation
+  virtual void initPWLA();
+  
   /// Initialize variables
   virtual void initVariables() = 0;
 
@@ -82,9 +94,12 @@ protected:
   /// Initialize objective
   virtual void initObjective() = 0;
   
-  /// Initialize piecewise linear approximation
-  virtual void initPWLA();
-  
+  double getCoord(int alpha) const
+  {
+    assert(0 <= alpha && alpha < _nrSegments);
+    return _coord[alpha];
+  }
+   
 protected:
   /// coord[alpha]
   DoubleVector _coord;
@@ -95,9 +110,9 @@ protected:
   /// hatPi[alpha]
   DoubleVector _hatPi;
   /// Solution state trees
-  StateTreeVector _solT;
+  PosteriorStateTreeMatrix _solT;
   /// Solution y
-  BoolTensor _solY;
+  DoubleTensor _solY;
 };
 
-#endif // HARDCLUSTERILP_H
+#endif // SOFTCLUSTERILP_H

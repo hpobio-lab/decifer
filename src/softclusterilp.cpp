@@ -1,13 +1,13 @@
 /*
- * hardclusterilp.cpp
+ * softclusterilp.cpp
  *
- *  Created on: 19-oct-2018
+ *  Created on: 15-apr-2019
  *      Author: M. El-Kebir
  */
 
-#include "hardclusterilp.h"
+#include "softclusterilp.h"
 
-HardClusterIlp::HardClusterIlp(const ReadMatrix& R,
+SoftClusterIlp::SoftClusterIlp(const ReadMatrix& R,
                                int k,
                                int nrSegments,
                                ClusterStatisticType statType,
@@ -23,7 +23,7 @@ HardClusterIlp::HardClusterIlp(const ReadMatrix& R,
 {
 }
 
-void HardClusterIlp::init()
+void SoftClusterIlp::init()
 {
   Solver::init();
   
@@ -33,7 +33,7 @@ void HardClusterIlp::init()
   initObjective();
 }
 
-void HardClusterIlp::initPWLA()
+void SoftClusterIlp::initPWLA()
 {
   assert(_nrSegments >= 2);
   

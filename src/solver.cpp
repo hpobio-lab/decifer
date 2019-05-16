@@ -52,67 +52,59 @@ void Solver::initPWLA()
   const int n = _R.getNrCharacters();
   const int m = _R.getNrSamples();
   
-  _hatG = Double5Matrix(n);
-  _x = Double5Matrix(n);
-  for (int i = 0; i < n; ++i)
+  // compute coord
+  DoubleVector coord(_nrSegments);
+  coord[0] = 0;
+  coord[_nrSegments - 1] = 1;
+  
+  const double delta = 1. / (_nrSegments - 1);
+  for (int alpha = 1; alpha < _nrSegments - 1; ++alpha)
   {
-    _hatG[i] = Double4Matrix(_scriptT[i].size());
-    _x[i] = Double4Matrix(_scriptT[i].size());
-    for (int t = 0; t < _scriptT[i].size(); ++t)
-    {
-      _hatG[i][t] = DoubleTensor(_k);
-      _x[i][t] = DoubleTensor(_k);
-      for (int j = 0; j < _k; ++j)
-      {
-        _hatG[i][t][j] = DoubleMatrix(m);
-        _x[i][t][j] = DoubleMatrix(m);
-        for (int p = 0; p < m; ++p)
-        {
-          _hatG[i][t][j][p] = DoubleVector(_nrSegments, 0);
-          _x[i][t][j][p] = DoubleVector(_nrSegments, 0);
-        }
-      }
-    }
+    coord[alpha] = delta * alpha;
   }
   
   // initialize segments
+  _hatG = Double5Matrix(n);
   for (int i = 0; i < n; ++i)
   {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    const int scriptT_i_size = _scriptT[i].size();
+    _hatG[i] = Double4Matrix(scriptT_i_size);
+    for (int t = 0; t < scriptT_i_size; ++t)
     {
+      _hatG[i][t] = DoubleTensor(_k);
       for (int j = 0; j < _k; ++j)
       {
+        _hatG[i][t][j] = DoubleMatrix(m);
         for (int p = 0; p < m; ++p)
         {
-          const double lb = std::max(_dLB[i][t][p], g_tol.epsilon());
-          const double ub = std::min(1., _dUB[i][t][p]);
-          assert(!g_tol.less(ub, lb));
-          const double delta = g_tol.different(lb, ub) ? (ub - lb) / (_nrSegments - 1) : 0;
+          _hatG[i][t][j][p] = DoubleVector(_nrSegments, 0);
           
           const int var_ip = _R.getVar(p, i);
           const int ref_ip = _R.getRef(p, i);
           
-          for (int l = 0; l < _nrSegments; ++l)
+          for (int alpha = 0; alpha < _nrSegments; ++alpha)
           {
-            _x[i][t][j][p][l] = lb + delta * l;
-            if (_x[i][t][j][p][l] == 0)
-            {
-              _x[i][t][j][p][l] = g_tol.epsilon();
-            }
-            double h = (_x[i][t][j][p][l] - _numerator[i][t][p]) / _denominator[i][p];
+            double h = (coord[alpha] - _numerator[i][t][p]) / _denominator[i][p];
             if (h <= 0 || !g_tol.nonZero(h))
             {
-              h = g_tol.epsilon();
+              _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
             }
-            if (h >= 1 || g_tol.less(1, h))
+            else if (h >= 1 || g_tol.less(1, h))
             {
-              h = 1 - g_tol.epsilon();
+              _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
             }
-            
-            assert(0 <= h && h <= 1);
-            _hatG[i][t][j][p][l] = getLogLikelihood(var_ip, ref_ip, h);
-            
-            assert(!isnan(_hatG[i][t][j][p][l]));
+            else
+            {
+              double likelihood = getLogLikelihood(var_ip, ref_ip, h);
+              if (likelihood < log(g_tol.epsilon()))
+              {
+                _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+              }
+              else
+              {
+                _hatG[i][t][j][p][alpha] = likelihood;
+              }
+            }
           }
         }
       }
@@ -405,16 +397,16 @@ void Solver::init(int i)
         _dUB[i][t][p] = _dLB[i][t][p];
       }
       
-      const double h_lb = (_dLB[i][t][p] - _numerator[i][t][p]) / _denominator[i][p];
-      if ((h_lb <= 0 || !g_tol.nonZero(h_lb)) && _R.getVar(p, i) != 0)
-      {
-        _dLB[i][t][p] += 1e-2;
-      }
-      const double h_ub = (_dUB[i][t][p] - _numerator[i][t][p]) / _denominator[i][p];
-      if ((h_ub >= 1 || g_tol.less(1, h_ub)) && _R.getRef(p, i) != 0)
-      {
-        _dUB[i][t][p] -= 1e-2;
-      }
+//      const double h_lb = (_dLB[i][t][p] - _numerator[i][t][p]) / _denominator[i][p];
+//      if ((h_lb <= 0 || !g_tol.nonZero(h_lb)) && _R.getVar(p, i) != 0)
+//      {
+//        _dLB[i][t][p] += 1e-2;
+//      }
+//      const double h_ub = (_dUB[i][t][p] - _numerator[i][t][p]) / _denominator[i][p];
+//      if ((h_ub >= 1 || g_tol.less(1, h_ub)) && _R.getRef(p, i) != 0)
+//      {
+//        _dUB[i][t][p] -= 1e-2;
+//      }
     }
   }
   
@@ -542,7 +534,7 @@ double Solver::updateLogLikelihood()
   {
     double L_i = getLogLikelihood(i);
     _logLikelihood += L_i;
-    std::cout << i << ": " << L_i << std::endl;
+//    std::cout << i << ": " << L_i << std::endl;
   }
 //  std::cout << std::endl;
   
