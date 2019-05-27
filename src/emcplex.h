@@ -11,6 +11,7 @@
 #include "em.h"
 #include "hardclusterilpcplex.h"
 #include "clusterilpcplex.h"
+#include "softclusterlpcplex.h"
 #include <ilcplex/ilocplex.h>
 
 class EMCplex : public EM
@@ -42,6 +43,28 @@ protected:
   bool stepM(int nrThreads,
              bool verbose);
   
+  virtual std::unique_ptr<IncrementalSolver> createIncrementalSolver(const ReadMatrix& R)
+  {
+    return std::unique_ptr<IncrementalSolver>(new IncrementalSolver(R,
+                                                                    _k,
+                                                                    6,
+                                                                    _statType,
+                                                                    _precisionBetaBin,
+                                                                    _forceTruncal));
+  }
+  
+  
+  virtual std::unique_ptr<SoftClusterIlp> createSoftClusterIlpSolver(const ReadMatrix& R)
+  {
+    return std::unique_ptr<SoftClusterIlp>(new SoftClusterLpCplex(R,
+                                                                  _k,
+                                                                  3,
+                                                                  _statType,
+                                                                  _precisionBetaBin,
+                                                                  _forceTruncal,
+                                                                  false));
+  }
+  
   virtual std::unique_ptr<HardClusterIlp> createHardClusterIlpSolver(const ReadMatrix& R)
   {
     return std::unique_ptr<HardClusterIlp>(new HardClusterIlpCplex(R,
@@ -49,7 +72,8 @@ protected:
                                                                    _nrSegments,
                                                                    _statType,
                                                                    _precisionBetaBin,
-                                                                   _forceTruncal));
+                                                                   _forceTruncal,
+                                                                   false));
   }
   
   virtual std::unique_ptr<ClusterIlp> createClusterIlpSolver(const ReadMatrix& R,
@@ -75,10 +99,10 @@ private:
   IloModel _model;
   /// Solver
   IloCplex _cplex;
-  /// lambda[i][t][j][p][l]
-  IloNumVar5Matrix _lambdaGRB;
-  /// fGRB[j][p]
-  IloNumVarMatrix _fGRB;
+  /// lambda[j][p][alpha]
+  IloNumVar3Matrix _lambda;
+  /// d[j][p]
+  IloNumVarMatrix _d;
 };
 
 #endif // EMCPLEX_H

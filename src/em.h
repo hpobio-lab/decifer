@@ -15,7 +15,9 @@
 #include "statetree.h"
 #include "posteriorstatetree.h"
 #include "hardclusterilp.h"
+#include "softclusterilp.h"
 #include "clusterilp.h"
+#include "incrementalsolver.h"
 
 class EM : public Solver
 {
@@ -99,6 +101,10 @@ public:
     return _initY;
   }
   
+  double getLogLikelihoodGamma(int i) const;
+  
+  double getLogLikelihoodGamma() const;
+  
 protected:
   /// E step
   virtual void stepE();
@@ -114,6 +120,10 @@ protected:
                                              double alpha) = 0;
   
   virtual std::unique_ptr<HardClusterIlp> createHardClusterIlpSolver(const ReadMatrix& R) = 0;
+  
+  virtual std::unique_ptr<SoftClusterIlp> createSoftClusterIlpSolver(const ReadMatrix& R) = 0;
+  
+  virtual std::unique_ptr<IncrementalSolver> createIncrementalSolver(const ReadMatrix& R) = 0;
   
   void kMeans(int seed);
   

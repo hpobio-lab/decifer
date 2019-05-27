@@ -14,11 +14,11 @@
 
 EM::EM(const ReadMatrix& R,
        int k,
-       int nrSegments,
+       int nrSegmentBits,
        ClusterStatisticType statType,
        double precisionBetaBin,
        bool forceTruncal)
-  : Solver(R, k, nrSegments, statType, precisionBetaBin, forceTruncal)
+  : Solver(R, k, (1 << nrSegmentBits) + 1, statType, precisionBetaBin, forceTruncal)
   , _gamma(R.getNrCharacters())
   , _solT()
   , _initY()
@@ -67,32 +67,6 @@ void EM::initPWLA()
   const int n = _R.getNrCharacters();
   const int m = _R.getNrSamples();
   
-  _hatG = Double5Matrix(n);
-  _x = Double5Matrix(n);
-  for (int i = 0; i < n; ++i)
-  {
-    _hatG[i] = Double4Matrix(_scriptT[i].size());
-    _x[i] = Double4Matrix(_scriptT[i].size());
-    for (int t = 0; t < _scriptT[i].size(); ++t)
-    {
-      _hatG[i][t] = DoubleTensor(_k);
-      _x[i][t] = DoubleTensor(_k);
-      for (int j = 0; j < _k; ++j)
-      {
-        if (isEnabled(i, t, j))
-        {
-          _hatG[i][t][j] = DoubleMatrix(m);
-          _x[i][t][j] = DoubleMatrix(m);
-          for (int p = 0; p < m; ++p)
-          {
-            _hatG[i][t][j][p] = DoubleVector(_nrSegments, 0);
-            _x[i][t][j][p] = DoubleVector(_nrSegments, 0);
-          }
-        }
-      }
-    }
-  }
-  
   _dOverallLB = DoubleMatrix(_k, DoubleVector(_R.getNrSamples(), 0));
   _dOverallUB = DoubleMatrix(_k, DoubleVector(_R.getNrSamples(), 1));
   for (int j = 0; j < _k; ++j)
@@ -125,52 +99,6 @@ void EM::initPWLA()
             _dOverallUB[j][p] = _dOverallUB[j][p] <= g_thre ? g_thre : _dOverallUB[j][p];
             
             assert(_dOverallLB[j][p] <= _dOverallUB[j][p]);
-          }
-        }
-      }
-    }
-  }
-
-  // initialize segments
-  for (int i = 0; i < n; ++i)
-  {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
-    {
-      for (int j = 0; j < _k; ++j)
-      {
-        if (isEnabled(i, t, j))
-        {
-          for (int p = 0; p < m; ++p)
-          {
-            const double lb = std::max(_dOverallLB[j][p], g_tol.epsilon());
-            const double ub = std::min(1., _dOverallUB[j][p]);
-            assert(!g_tol.less(ub, lb));
-            const double delta = g_tol.different(lb, ub) ? (ub - lb) / (_nrSegments - 1) : 0;
-            
-            const int var_ip = _R.getVar(p, i);
-            const int ref_ip = _R.getRef(p, i);
-            
-            for (int l = 0; l < _nrSegments; ++l)
-            {
-              _x[i][t][j][p][l] = lb + delta * l;
-              if (_x[i][t][j][p][l] == 0)
-              {
-                _x[i][t][j][p][l] = g_tol.epsilon();
-              }
-              double h = (_x[i][t][j][p][l] - _numerator[i][t][p]) / _denominator[i][p];
-              if (h <= 0 || !g_tol.nonZero(h))
-              {
-                h = g_tol.epsilon();
-              }
-              if (h >= 1 || g_tol.less(1, h))
-              {
-                h = 1 - g_tol.epsilon();
-              }
-              
-              assert(0 <= h && h <= 1);
-              _hatG[i][t][j][p][l] = getLogLikelihood(var_ip, ref_ip, h);
-              assert(!isnan(_hatG[i][t][j][p][l]));
-            }
           }
         }
       }
@@ -225,7 +153,7 @@ bool EM::initializeD(int seed,
   {
     {
 //      std::cerr << "Hard clustering (probabilistic)..." << std::endl;
-      std::unique_ptr<HardClusterIlp> pILP = createHardClusterIlpSolver(R);
+      std::unique_ptr<IncrementalSolver> pILP = createIncrementalSolver(R);
       pILP->init();
 //      if (!_initY.empty())
 //      {
@@ -320,7 +248,10 @@ bool EM::solve(int restart,
     }
     
     double delta = updateLogLikelihood();
-    std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = " << ++step << " -- log likelihood = " << _logLikelihood << " -- " << timer.realTime() << " s" << std::endl;
+    std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = " << ++step
+              << " -- log likelihood = " << _logLikelihood << " -- "
+//              << " -- gamma log likelihood = " << getLogLikelihoodGamma() << " -- "
+              <<  timer.realTime() << " s" << std::endl;
     if (!g_tol.nonZero(delta))
     {
       break;
@@ -383,6 +314,78 @@ bool EM::solve(int restart,
   }
   
   return true;
+}
+
+double EM::getLogLikelihoodGamma(int i) const
+{
+  const int m = _R.getNrSamples();
+  const int n = _R.getNrCharacters();
+  
+  assert(0 <= i && i < n);
+  
+  double sum_i = 0;
+  const StateEdgeSetVector& scriptT_i = _scriptT[i];
+  const int size_scriptT_i = scriptT_i.size();
+  const int maxCopyNumber = _R.getMaxCopies(i);
+  
+  for (int t = 0; t < size_scriptT_i; ++t)
+  {
+    const StateEdgeSet& T_it = scriptT_i[t];
+    for (int j = 0; j < _k; ++j)
+    {
+      if (_solPi[j] == 0)
+        continue;
+      
+      double prod = _solPi[j] / size_scriptT_i;
+      double log_prod = log(prod);
+      if (g_tol.nonZero(_gamma[i][t][j]))
+      {
+        for (int p = 0; p < m; ++p)
+        {
+          const ReadMatrix::CopyNumberStateVector& cnStates_pi = _R.getCopyNumberStates(p, i);
+          const int var_pi = _R.getVar(p, i);
+          const int ref_pi = _R.getRef(p, i);
+          
+          assert(isFeasible(_solD[j][p],
+                            _xyStar[i][t],
+                            cnStates_pi,
+                            T_it,
+                            maxCopyNumber));
+          {
+            const double h = (_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p];
+            assert(_denominator[i][p] != 0);
+            if (!((!(h <= 0 || !g_tol.nonZero(h)) || var_pi == 0) && (!(h >= 1 || g_tol.less(1, h)) || ref_pi == 0)))
+            {
+              prod = 0;
+              break;
+            }
+            else
+            {
+              const double val = getLogLikelihood(var_pi, ref_pi, h);
+              log_prod += val;
+            }
+          }
+        }
+        log_prod *= _gamma[i][t][j];
+        sum_i += log_prod;
+      }
+    }
+  }
+  
+  return sum_i;
+}
+
+double EM::getLogLikelihoodGamma() const
+{
+  const int n = _R.getNrCharacters();
+  
+  double sum = 0;
+  for (int i = 0; i < n; ++i)
+  {
+    sum += getLogLikelihoodGamma(i);
+  }
+  
+  return sum;
 }
 
 void EM::writeMutationProperties(std::ostream& out) const
@@ -452,7 +455,13 @@ void EM::stepE()
       const StateEdgeSet& T_it = scriptT_i[t];
       for (int j = 0; j < _k; ++j)
       {
-        double prod = _solPi[j];
+        _gamma[i][t][j] = 0;
+        
+        if (_solPi[j] == 0)
+          continue;
+        
+        double prod = _solPi[j] / size_scriptT_i;
+        double log_prod = log(prod);
         for (int p = 0; p < m; ++p)
         {
           const ReadMatrix::CopyNumberStateVector& cnStates_pi = _R.getCopyNumberStates(p, i);
@@ -475,8 +484,7 @@ void EM::stepE()
             else
             {
               const double val = getLogLikelihood(var_pi, ref_pi, h);
-              prod *= exp(val);
-              prod = std::max(std::numeric_limits<double>::min(), prod);
+              log_prod += val;
             }
           }
           else
@@ -485,8 +493,15 @@ void EM::stepE()
             break;
           }
         }
-        _gamma[i][t][j] = prod;
-        sum += prod;
+        
+        if (g_tol.nonZero(prod))
+        {
+          //sum_i += prod;
+          prod = exp(log_prod);
+          prod = std::max(std::numeric_limits<double>::min(), prod);
+          sum += prod;
+          _gamma[i][t][j] = prod;
+        }
       }
     }
     
@@ -502,6 +517,10 @@ void EM::stepE()
         }
         else
         {
+          if (!g_tol.different(1, _gamma[i][t][j]))
+          {
+            _gamma[i][t][j] = 1;
+          }
           ok = true;
         }
       }

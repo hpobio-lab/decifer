@@ -55,7 +55,7 @@ public:
   }
   
   /// Return DCF
-  const DoubleMatrix& getF() const
+  const DoubleMatrix& getD() const
   {
     return _solD;
   }
@@ -63,7 +63,7 @@ public:
   /// Return pi
   ///
   /// @param j Cluster
-  int getPi(int j) const
+  double getPi(int j) const
   {
     assert(0 <= j && j < _k);
     
@@ -141,6 +141,12 @@ public:
   /// @param ref Number of reference reads
   /// @param f SNV fraction
   double getLogLikelihood(int var, int ref, double f) const;
+  
+  /// Return number of segments
+  int getNrSegments() const
+  {
+    return _nrSegments;
+  }
   
 protected:
   typedef ReadMatrix::CopyNumberStateVector CopyNumberStateVector;

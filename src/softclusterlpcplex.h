@@ -1,36 +1,36 @@
 /*
- * hardclusterilpcplex.h
+ * softclusterlpcplex.h
  *
- *  Created on: 19-oct-2018
+ *  Created on: 17-apr-2019
  *      Author: M. El-Kebir
  */
 
-#ifndef HARDCLUSTERILPCPLEX_H
-#define HARDCLUSTERILPCPLEX_H
+#ifndef SOFTCLUSTERLPCPLEX_H
+#define SOFTCLUSTERLPCPLEX_H
 
-#include "hardclusterilp.h"
+#include "softclusterilp.h"
 #include <ilcplex/ilocplex.h>
 
-class HardClusterIlpCplex : public HardClusterIlp
+class SoftClusterLpCplex : public SoftClusterIlp
 {
 public:
   /// Constructor
   ///
   /// @param R Read matrix
   /// @param k Number of clusters
-  /// @param nrSegments Number of segments for piecewise linear approximation
+  /// @param nrSegments Number of bits to model segments for piecewise linear approximation
   /// @param statType Summary statistic to use for clustering
   /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
-  /// @param includePi Include pi in optimization
-  HardClusterIlpCplex(const ReadMatrix& R,
-                      int k,
-                      int nrSegments,
-                      ClusterStatisticType statType,
-                      double precisionBetaBin,
-                      bool forceTruncal,
-                      bool includePi);
-
+  /// @param pi Include pi in optimization
+  SoftClusterLpCplex(const ReadMatrix& R,
+                     int k,
+                     int nrSegmentBits,
+                     ClusterStatisticType statType,
+                     double precisionBetaBin,
+                     bool forceTruncal,
+                     bool pi);
+  
   /// Export ILP
   ///
   /// @param filename Filename
@@ -55,7 +55,13 @@ public:
   /// @param y Clustering and state tree assignment
   void initHotStart(const BoolTensor& y);
   
-  virtual ~HardClusterIlpCplex()
+  /// Initialize DCF constraints
+  virtual void initConstraintsDCF(const DoubleMatrix& d,
+                                  int multiplicity);
+  
+  virtual void initConstraintsY(const DoubleTensor& y);
+  
+  virtual ~SoftClusterLpCplex()
   {
     _env.end();
   }
@@ -70,6 +76,26 @@ protected:
   /// Initialize objective function
   virtual void initObjective();
   
+  /// Convert binary number to gray
+  unsigned int binaryToGray(unsigned int num)
+  {
+    num = _nrSegments - num - 2;
+    unsigned int val = num ^ (num >> 1);
+
+    // reverse
+    unsigned int reverse_val = 0;
+    for (int i = 0; i < _nrSegmentBits; ++i)
+    {
+      unsigned int bit = (val & (1 << (_nrSegmentBits - i - 1)));
+      if (bit)
+      {
+        reverse_val |= (1 << i);
+      }
+    }
+    
+    return reverse_val;
+  }
+  
 private:
   typedef IloArray<IloBoolVarArray> IloBoolVarMatrix;
   typedef IloArray<IloBoolVarMatrix> IloBoolVar3Matrix;
@@ -77,27 +103,36 @@ private:
   typedef IloArray<IloNumVarMatrix> IloNumVar3Matrix;
   typedef IloArray<IloNumVar3Matrix> IloNumVar4Matrix;
   typedef IloArray<IloNumVar4Matrix> IloNumVar5Matrix;
+  typedef IloArray<IloNumVar5Matrix> IloNumVar6Matrix;
   
-  /// Include pi in optmization
-  const bool _includePi;
+  /// Number of bits to model segments for piecewise linear approximation
+  const int _nrSegmentBits;
   /// Environment
   IloEnv _env;
   /// CPlex model
   IloModel _model;
   /// Solver
   IloCplex _cplex;
-  /// y[i][t][j] = 1 iff state tree t and cluster j for SNV i
-  IloBoolVar3Matrix _y;
+  /// y[i][t][j] -- posterior probability of state tree t and cluster j for SNV i
+  IloNumVar3Matrix _y;
   /// d[j][p]
   IloNumVarMatrix _d;
   /// pi[j]
   IloNumVarArray _pi;
   /// gamma[j][alpha]
   IloNumVarMatrix _gamma;
+  /// ggamma[j][alpha]
+  IloNumVarMatrix _ggamma;
+  /// bggamma[j][beta]
+  IloBoolVarMatrix _bggamma;
   /// lambda[i][t][j][p][alpha]
   IloNumVar5Matrix _lambda;
   /// llambda[j][p][alpha]
   IloNumVar3Matrix _llambda;
+  /// bllambda[j][p][beta]
+  IloBoolVar3Matrix _bllambda;
+  /// Include pi in optmization
+  const bool _includePi;
 };
 
-#endif // HARDCLUSTERILPCPLEX_H
+#endif // SOFTCLUSTERLPCPLEX_H

@@ -15,6 +15,7 @@
   #include "softclusterilpcplex.h"
   #include "softclusterlpcplex.h"
   #include "softclusterlpcplexext.h"
+  #include "incrementalsolver.h"
   typedef EMCplex EMAlg;
   typedef ClusterIlpCplex ClusterIlpAlg;
   typedef HardClusterIlpCplex HardClusterIlpAlg;
@@ -111,6 +112,28 @@ Solution runEM(const ReadMatrix& R,
           std::ofstream outT((std::string(buf) + ".T.res").c_str());
           outT << em.getPosteriorStateTrees();
           outT.close();
+          
+          std::ofstream outD((std::string(buf) + ".D.res").c_str());
+          outD << k << " #clusters" << std::endl;
+          outD << R.getNrSamples() << " #samples" << std::endl;
+          for (int j = 0; j < k; ++j)
+          {
+            for (int p = 0; p < R.getNrSamples(); ++p)
+            {
+              if (p > 0)
+              {
+                outD << " ";
+              }
+              outD << em.getD(p, j);
+            }
+            outD << std::endl;
+          }
+          for (int j = 0; j < k; ++j)
+          {
+            outD << em.getPi(j) << std::endl;
+          }
+          outD.close();
+          
           initY = em.getInitY();
         }
         std::cerr << std::endl;
@@ -166,6 +189,27 @@ Solution runCluster(const ReadMatrix& R,
     outT << solver.getStateTrees();
     outT.close();
     
+    std::ofstream outD((std::string(buf) + ".D.res").c_str());
+    outD << k << " #clusters" << std::endl;
+    outD << R.getNrSamples() << " #samples" << std::endl;
+    for (int j = 0; j < k; ++j)
+    {
+      for (int p = 0; p < R.getNrSamples(); ++p)
+      {
+        if (j > 0)
+        {
+          outD << " ";
+        }
+        outD << solver.getD(p, j);
+      }
+      outD << std::endl;
+    }
+    for (int j = 0; j < k; ++j)
+    {
+      outD << solver.getPi(j) << std::endl;
+    }
+    outD.close();
+    
     logLikelihood = solver.getLogLikelihood();
   }
   
@@ -185,7 +229,7 @@ Solution runSoftCluster(const ReadMatrix& R,
                         bool forceTruncal,
                         double betaBin)
 {
-  SoftClusterLpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal, true);
+  SoftClusterLpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal, false);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -202,6 +246,27 @@ Solution runSoftCluster(const ReadMatrix& R,
     std::ofstream outT((std::string(buf) + ".T.res").c_str());
     outT << solver.getPosteriorStateTrees();
     outT.close();
+    
+    std::ofstream outD((std::string(buf) + ".D.res").c_str());
+    outD << k << " #clusters" << std::endl;
+    outD << R.getNrSamples() << " #samples" << std::endl;
+    for (int j = 0; j < k; ++j)
+    {
+      for (int p = 0; p < R.getNrSamples(); ++p)
+      {
+        if (j > 0)
+        {
+          outD << " ";
+        }
+        outD << solver.getD(p, j);
+      }
+      outD << std::endl;
+    }
+    for (int j = 0; j < k; ++j)
+    {
+      outD << solver.getPi(j) << std::endl;
+    }
+    outD.close();
     
     logLikelihood = solver.getLogLikelihood();
   }
@@ -222,7 +287,7 @@ Solution runHardCluster(const ReadMatrix& R,
                         bool forceTruncal,
                         double betaBin)
 {
-  HardClusterIlpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal);
+  HardClusterIlpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal, false);
   solver.init();
   solver.initHotStart(prevSolution);
   
@@ -240,10 +305,99 @@ Solution runHardCluster(const ReadMatrix& R,
     outT << solver.getStateTrees();
     outT.close();
     
+    std::ofstream outD((std::string(buf) + ".D.res").c_str());
+    outD << k << " #clusters" << std::endl;
+    outD << R.getNrSamples() << " #samples" << std::endl;
+    for (int j = 0; j < k; ++j)
+    {
+      for (int p = 0; p < R.getNrSamples(); ++p)
+      {
+        if (j > 0)
+        {
+          outD << " ";
+        }
+        outD << solver.getD(p, j);
+      }
+      outD << std::endl;
+    }
+    for (int j = 0; j < k; ++j)
+    {
+      outD << solver.getPi(j) << std::endl;
+    }
+    outD.close();
+    
     logLikelihood = solver.getLogLikelihood();
   }
   
   return std::make_pair(logLikelihood, solver.getSolY());
+}
+
+Solution runIncrementalSolver(const ReadMatrix& R,
+                              const Solver::ClusterStatisticType statType,
+                              int k,
+                              int nrSegments,
+                              int nrThreads,
+                              int timeLimit,
+                              const std::string& outputPrefix,
+                              const BoolTensor& prevSolution,
+                              bool verbose,
+                              int memoryLimit,
+                              bool forceTruncal,
+                              double betaBin,
+                              int nrRestarts,
+                              int nrDownSampledSNVs)
+{
+  IncrementalSolver solver(R, k, nrSegments, statType, betaBin, forceTruncal);
+  solver.init();
+  
+  double logLikelihood = -std::numeric_limits<double>::max();
+  bool success = false;
+//  if (nrRestarts == -1)
+  {
+    success = solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
+  }
+//  else
+//  {
+//    success = solver.solve(nrThreads, timeLimit, verbose, memoryLimit, nrDownSampledSNVs, nrRestarts);
+//  }
+  if (success)
+  {
+    char buf[1024];
+    snprintf(buf, 1024, "%s_k%d", outputPrefix.c_str(), k);
+    
+    std::ofstream outSNV((std::string(buf) + ".SNV.tsv").c_str());
+    solver.writeMutationProperties(outSNV);
+    outSNV.close();
+    
+    std::ofstream outT((std::string(buf) + ".T.res").c_str());
+    outT << solver.getPosteriorStateTrees();
+    outT.close();
+    
+    std::ofstream outD((std::string(buf) + ".D.res").c_str());
+    outD << k << " #clusters" << std::endl;
+    outD << R.getNrSamples() << " #samples" << std::endl;
+    for (int j = 0; j < k; ++j)
+    {
+      for (int p = 0; p < R.getNrSamples(); ++p)
+      {
+        if (j > 0)
+        {
+          outD << " ";
+        }
+        outD << solver.getD(p, j);
+      }
+      outD << std::endl;
+    }
+    for (int j = 0; j < k; ++j)
+    {
+      outD << solver.getPi(j) << std::endl;
+    }
+    outD.close();
+    
+    logLikelihood = solver.getLogLikelihood();
+  }
+  
+  return std::make_pair(logLikelihood, BoolTensor());
 }
 
 int getNrParameters(const ReadMatrix& R,
@@ -354,6 +508,17 @@ Solution run(const ReadMatrix& R,
                             memoryLimit,
                             forceTruncal,
                             betaBin);
+    case 7:
+      return runIncrementalSolver(R, statType, k,
+                                  nrSegments, nrThreads,
+                                  timeLimit, outputPrefix,
+                                  prevSolution,
+                                  verbose,
+                                  memoryLimit,
+                                  forceTruncal,
+                                  betaBin,
+                                  nrRestarts,
+                                  downsampleSNVs);
     default:
       std::cerr << "Error: invalid method" << std::endl;
       return std::make_pair(-std::numeric_limits<double>::max(), BoolTensor());
@@ -495,6 +660,9 @@ int main(int argc, char** argv)
       break;
     case 6:
       std::cerr << "Exact EM algorithm";
+      break;
+    case 7:
+      std::cerr << "Incremental algorithm";
       break;
   }
   std::cerr << std::endl;
