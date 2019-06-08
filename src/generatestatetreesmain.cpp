@@ -110,6 +110,8 @@ int main(int argc, char** argv)
         StateGraph::writeStateTrees(outS);
         outS.close();
       }
+      
+      std::cerr << "Processed " << filename << "..." << std::endl;
     }
   }
   else
