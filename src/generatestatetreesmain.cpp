@@ -54,20 +54,22 @@ int main(int argc, char** argv)
 {
   int maxXY = 3;
   int maxCN = 2;
-  std::string stateTreeFilename;
+  std::string inputStateTreeFilename;
+  std::string outputStateTreeFilename;
   
   lemon::ArgParser ap(argc, argv);
   ap.refOption("maxXY", "Maximum number of maternal/paternal copies (default: 3)", maxXY, false)
     .refOption("maxCN", "Maximum number of copy number events (default: 2)", maxCN, false)
-    .refOption("S", "State tree file", stateTreeFilename, false);
+    .refOption("S", "Input state tree file", inputStateTreeFilename, false)
+    .refOption("SS", "Output state tree file", outputStateTreeFilename, false);
   ap.parse();
   
-  if (!stateTreeFilename.empty())
+  if (!inputStateTreeFilename.empty())
   {
-    std::ifstream inS(stateTreeFilename);
+    std::ifstream inS(inputStateTreeFilename.c_str());
     if (!inS.good())
     {
-      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading." << std::endl;
+      std::cerr << "Error: could not open '" << inputStateTreeFilename << "' for reading." << std::endl;
       return 1;
     }
     else
@@ -101,6 +103,13 @@ int main(int argc, char** argv)
       
       Solver solver(R, 1, 1, Solver::CLUSTER_DCF, -1, false);
       solver.init();
+      
+      if (!outputStateTreeFilename.empty())
+      {
+        std::ofstream outS(outputStateTreeFilename.c_str());
+        StateGraph::writeStateTrees(outS);
+        outS.close();
+      }
     }
   }
   else
