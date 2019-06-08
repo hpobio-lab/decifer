@@ -44,6 +44,11 @@ public:
   /// @param new_n New number of characters
   ReadMatrix downSampleCharacters(int new_n) const;
   
+  /// Downsample characters
+  ///
+  /// @param snvIndices SNV indices to retain
+  ReadMatrix downSampleCharacters(const IntVector& snvIndices) const;
+  
   static IntDoublePair computeSangerCCF(int ref,
                                         int var,
                                         double purity,
@@ -234,6 +239,72 @@ public:
         }
       }
     }
+    
+    // remove (x,y) if mu = 0 in all samples
+    for (int i = 0; i < _n; ++i)
+    {
+      IntPairSet toRemove;
+      for (const CopyNumberState& cnState : _cnStates[0][i])
+      {
+        IntPair xy(cnState._x, cnState._y);
+        bool remove = true;
+        for (int p = 0; p < _m; ++p)
+        {
+          assert(_cnStateToMu[p][i].count(xy) == 1);
+          if (_cnStateToMu[p][i][xy] > 0)
+          {
+            remove = false;
+          }
+        }
+        
+        if (remove)
+        {
+          toRemove.insert(xy);
+        }
+      }
+      
+      for (const IntPair& xy : toRemove)
+      {
+        for (int p = 0; p < _m; ++p)
+        {
+          assert(_cnStateToMu[p][i].count(xy) == 1);
+          _cnStateToMu[p][i].erase(xy);
+        
+          for (auto it = _cnStates[p][i].begin(); it != _cnStates[p][i].end(); ++it)
+          {
+            if (it->_x == xy.first && it->_y == xy.second)
+            {
+              _cnStates[p][i].erase(it);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  IntMatrix partition() const
+  {
+    IntMatrix result;
+    
+    std::map<CopyNumberStateToMuMapVector, IntVector> map;
+    for (int i = 0; i < _n; ++i)
+    {
+      CopyNumberStateToMuMapVector cnVector;
+      for (int p = 0; p < _m; ++p)
+      {
+        cnVector.push_back(_cnStateToMu[p][i]);
+      }
+      
+      map[cnVector].push_back(i);
+    }
+        
+    for (const auto& kv : map)
+    {
+      result.push_back(kv.second);
+    }
+    
+    return result;
   }
   
   double getVAF(int p, int i) const

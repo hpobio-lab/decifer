@@ -79,11 +79,19 @@ public:
   {
   };
   
+  /// Initialize pre clustering constraints
+  ///
+  /// @param preClustering Pre clustering
+  virtual void initPreClusteringConstraints(const IntMatrix& preClustering);
+  
 protected:
   typedef std::vector<Double5Matrix> Double6Matrix;
   
   /// Initialize piecewise linear approximation
   virtual void initPWLA();
+  
+  /// Initialize pre clustering constraint
+  virtual void initPreClusteringConstraint(int i1, int i2) = 0;
   
   /// Initialize variables
   virtual void initVariables() = 0;

@@ -28,6 +28,20 @@ SoftClusterIlpCplex::SoftClusterIlpCplex(const ReadMatrix& R,
 {
 }
 
+void SoftClusterIlpCplex::initPreClusteringConstraint(int i1, int i2)
+{
+  assert(_scriptT[i1].size() == _scriptT[i2].size());
+  
+  const int scriptT_size = _scriptT[i1].size();
+  for (int t = 0; t < scriptT_size; ++t)
+  {
+    for (int j = 0; j < _k; ++j)
+    {
+      _model.add(_y[i1][t][j] == _y[i2][t][j]);
+    }
+  }
+}
+
 void SoftClusterIlpCplex::initHotStart(const BoolTensor& y)
 {
 }

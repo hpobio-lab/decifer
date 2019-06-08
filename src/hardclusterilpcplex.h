@@ -55,6 +55,7 @@ public:
   /// @param y Clustering and state tree assignment
   void initHotStart(const BoolTensor& y);
   
+  /// Destructor
   virtual ~HardClusterIlpCplex()
   {
     _env.end();

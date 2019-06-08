@@ -114,7 +114,7 @@ bool IncrementalSolver::solve(const ReadMatrix& R,
   {
     SoftClusterLpCplex solver(R, _k, nrBits, _statType, _precisionBetaBin, _forceTruncal, includePi);
     solver.init();
-    solver.initConstraintsDCF(_solD, 2);
+    solver.initConstraintsDCF(_solD, 3);
 //    solver.initConstraintsY(y);
     
     solver.solve(nrThreads, timeLimit, verbose, memoryLimit);

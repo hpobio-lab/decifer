@@ -9,6 +9,7 @@
 #include <lemon/arg_parser.h>
 #include <fstream>
 #include <lemon/time_measure.h>
+#include "precluster.h"
 
 #ifdef CPLEX
   #include "emcplex.h"
@@ -196,7 +197,7 @@ Solution runCluster(const ReadMatrix& R,
     {
       for (int p = 0; p < R.getNrSamples(); ++p)
       {
-        if (j > 0)
+        if (p > 0)
         {
           outD << " ";
         }
@@ -227,11 +228,16 @@ Solution runSoftCluster(const ReadMatrix& R,
                         bool verbose,
                         int memoryLimit,
                         bool forceTruncal,
-                        double betaBin)
+                        double betaBin,
+                        const IntMatrix& preClustering)
 {
-  SoftClusterLpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal, false);
+  SoftClusterLpAlg solver(R, k, log(nrSegments)/log(2), statType, betaBin, forceTruncal, false);
   solver.init();
   solver.initHotStart(prevSolution);
+  if (!preClustering.empty())
+  {
+    solver.initPreClusteringConstraints(preClustering);
+  }
   
   double logLikelihood = -std::numeric_limits<double>::max();
   if (solver.solve(nrThreads, timeLimit, verbose, memoryLimit))
@@ -254,7 +260,7 @@ Solution runSoftCluster(const ReadMatrix& R,
     {
       for (int p = 0; p < R.getNrSamples(); ++p)
       {
-        if (j > 0)
+        if (p > 0)
         {
           outD << " ";
         }
@@ -312,7 +318,7 @@ Solution runHardCluster(const ReadMatrix& R,
     {
       for (int p = 0; p < R.getNrSamples(); ++p)
       {
-        if (j > 0)
+        if (p > 0)
         {
           outD << " ";
         }
@@ -380,7 +386,7 @@ Solution runIncrementalSolver(const ReadMatrix& R,
     {
       for (int p = 0; p < R.getNrSamples(); ++p)
       {
-        if (j > 0)
+        if (p > 0)
         {
           outD << " ";
         }
@@ -451,7 +457,8 @@ Solution run(const ReadMatrix& R,
              int globalTimeLimit,
              int memoryLimit,
              bool forceTruncal,
-             double betaBin)
+             double betaBin,
+             const IntMatrix& preClustering)
 {
   switch (method)
   {
@@ -507,7 +514,8 @@ Solution run(const ReadMatrix& R,
                             verbose,
                             memoryLimit,
                             forceTruncal,
-                            betaBin);
+                            betaBin,
+                            preClustering);
     case 7:
       return runIncrementalSolver(R, statType, k,
                                   nrSegments, nrThreads,
@@ -547,6 +555,7 @@ int main(int argc, char** argv)
   std::string stateTreeFilename;
   double precisionBetaBin = -1;
   bool forceTruncal;
+  bool usePreClustering;
 
   lemon::ArgParser ap(argc, argv);
   ap.refOption("s", "Random number generator seed (default: 0)", seed)
@@ -577,6 +586,7 @@ int main(int argc, char** argv)
     .refOption("v", "Verbose (default: 0)", verbose, false)
     .refOption("ML", "Memory limit", memoryLimit)
     .refOption("S", "State tree file", stateTreeFilename, false)
+    .refOption("P", "Use pre clustering", usePreClustering)
     .other("filename");
   ap.parse();
   
@@ -630,14 +640,24 @@ int main(int argc, char** argv)
     }
   }
   
-  std::cerr << "Arguments:";
+  std::cerr << "Arguments: ";
   for (int i = 1; i < argc; ++i)
   {
     std::cerr << " " << argv[i];
   }
   std::cerr << std::endl;
-  std::cerr << "Input:     instance with n = " << R.getNrCharacters() << " SNVs and m = " << R.getNrSamples() << " samples" << std::endl;
-  std::cerr << "Algorithm: ";
+  std::cerr << "Input:      instance with n = " << R.getNrCharacters() << " SNVs and m = " << R.getNrSamples() << " samples" << std::endl;
+  
+  IntMatrix preClustering;
+  if (usePreClustering)
+  {
+    PreCluster pc(R);
+    pc.run(nrSegments, statType, precisionBetaBin, nrThreads, timeLimit, verbose, memoryLimit);
+    
+    preClustering = pc.getPreClustering();
+  }
+  
+  std::cerr << "Algorithm:  ";
   switch (method)
   {
     case 0:
@@ -699,7 +719,7 @@ int main(int argc, char** argv)
                          nrRestarts, outputPrefix,
                          method, alpha, initY, verbose,
                          downsampleSNVs, localTimeLimit,
-                         memoryLimit, forceTruncal, precisionBetaBin);
+                         memoryLimit, forceTruncal, precisionBetaBin, preClustering);
       initY = sol.second;
       int nrParameters = getNrParameters(R, statType, kk, method, precisionBetaBin);
       double b = log(nrObservations) * nrParameters - 2 * sol.first;
@@ -717,7 +737,7 @@ int main(int argc, char** argv)
                        method, alpha, BoolTensor(), verbose,
                        downsampleSNVs, globalTimeLimit,
                        memoryLimit, forceTruncal,
-                       precisionBetaBin);
+                       precisionBetaBin, preClustering);
     std::cerr << "Log likelihood " << sol.first << std::endl;
   }
   

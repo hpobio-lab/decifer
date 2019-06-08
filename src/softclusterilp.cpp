@@ -33,6 +33,18 @@ void SoftClusterIlp::init()
   initObjective();
 }
 
+void SoftClusterIlp::initPreClusteringConstraints(const IntMatrix& preClustering)
+{
+  for (const IntVector& preCluster : preClustering)
+  {
+    const int size = preCluster.size();
+    for (int i = 1; i < size; ++i)
+    {
+      initPreClusteringConstraint(preCluster[i-1], preCluster[i]);
+    }
+  }
+}
+
 void SoftClusterIlp::initPWLA()
 {
   assert(_nrSegments >= 2);

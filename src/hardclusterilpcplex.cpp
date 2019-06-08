@@ -284,7 +284,7 @@ void HardClusterIlpCplex::initConstraints()
       }
     }
   }
-  
+   
   sum.end();
   sum2.end();
 }

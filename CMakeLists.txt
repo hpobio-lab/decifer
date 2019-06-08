@@ -192,6 +192,8 @@ if (CPLEX)
     src/emcplex.cpp
     src/solver.cpp
     src/posteriorstatetree.cpp
+    src/precluster.cpp
+    src/hardpreclusterilpcplex.cpp
   )
 
   set( decifer_hdr
@@ -219,6 +221,8 @@ if (CPLEX)
     src/dkm/dkm_utils.hpp
     src/solver.h
     src/posteriorstatetree.h
+    src/precluster.h
+    src/hardpreclusterilpcplex.h
   )
 else()
   set( decifer_src

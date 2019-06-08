@@ -40,6 +40,13 @@ ReadMatrix ReadMatrix::downSampleCharacters(int new_n) const
   std::shuffle(snvIndices.begin(), snvIndices.end(), g_rng);
   snvIndices.erase(snvIndices.begin() + new_n, snvIndices.end());
   
+  return downSampleCharacters(snvIndices);
+}
+
+ReadMatrix ReadMatrix::downSampleCharacters(const IntVector& snvIndices) const
+{
+  const int new_n = snvIndices.size();
+  
   ReadMatrix newR;
   newR._m = _m;
   newR._n = new_n;

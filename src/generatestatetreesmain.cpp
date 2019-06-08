@@ -54,11 +54,27 @@ int main(int argc, char** argv)
 {
   int maxXY = 3;
   int maxCN = 2;
+  std::string stateTreeFilename;
   
   lemon::ArgParser ap(argc, argv);
   ap.refOption("maxXY", "Maximum number of maternal/paternal copies (default: 3)", maxXY, false)
-    .refOption("maxCN", "Maximum number of copy number events (default: 2)", maxCN, false);
+    .refOption("maxCN", "Maximum number of copy number events (default: 2)", maxCN, false)
+    .refOption("S", "State tree file", stateTreeFilename, false);
   ap.parse();
+  
+  if (!stateTreeFilename.empty())
+  {
+    std::ifstream inS(stateTreeFilename);
+    if (!inS.good())
+    {
+      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading." << std::endl;
+      return 1;
+    }
+    else
+    {
+      StateGraph::readStateTrees(inS);
+    }
+  }
   
   if (!ap.files().empty())
   {

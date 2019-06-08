@@ -61,6 +61,12 @@ public:
   }
   
 protected:
+  /// Initialize pre clustering constraint
+  ///
+  /// @param i1 SNV
+  /// @param i2 SNV
+  virtual void initPreClusteringConstraint(int i1, int i2);
+  
   /// Initialize variables
   virtual void initVariables();
   

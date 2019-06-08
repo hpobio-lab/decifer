@@ -148,17 +148,17 @@ void EMCplex::initPWLA()
     }
   }
   
-//  if (_forceTruncal)
-//  {
-//    // Cluster 0 has largest DCF in all samples
-//    for (int j = 1; j < _k; ++j)
-//    {
-//      for (int p = 0; p < m; ++p)
-//      {
-//        _model.add(_d[j][p] <= _d[0][p]);
-//      }
-//    }
-//  }
+  if (_forceTruncal)
+  {
+    // Cluster 0 has largest DCF in all samples
+    for (int j = 1; j < _k; ++j)
+    {
+      for (int p = 0; p < m; ++p)
+      {
+        _model.add(_d[j][p] <= _d[0][p]);
+      }
+    }
+  }
   
   _model.add(IloMaximize(_env, obj));
   obj.end();
