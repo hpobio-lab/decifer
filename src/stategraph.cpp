@@ -859,5 +859,8 @@ void StateGraph::writeStateTrees(std::ostream& out)
 
 void StateGraph::readStateTrees(std::istream& in)
 {
-  in >> _dict;
+  Dictionary newDict;
+  in >> newDict;
+  
+  _dict.insert(newDict.begin(), newDict.end());
 }
