@@ -79,6 +79,11 @@ void PreCluster::run(const IntVector& snvIndices,
     double b = log(nrObservations) * nrParameters - 2 * solver.getLogLikelihood();
     std::cerr << "k = " << k << " -- Log likelihood " << solver.getLogLikelihood() << " -- BIC " << b << std::endl;
     
+    if (solver.getLogLikelihood() == INFINITY)
+    {
+      continue;
+    }
+    
     if (b < min_bic)
     {
       min_bic = b;
