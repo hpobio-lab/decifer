@@ -94,7 +94,7 @@ int main(int argc, char** argv)
   
   for (const IntVector& precluster : preClustering)
   {
-    bool first = false;
+    bool first = true;
     for (int i : precluster)
     {
       if (first)
