@@ -567,6 +567,12 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
     _cplex.setError(_env.getNullStream());
     _cplex.setWarning(_env.getNullStream());
   }
+  else
+  {
+    _cplex.setOut(std::cerr);
+    _cplex.setError(std::cerr);
+    _cplex.setWarning(std::cerr);
+  }
   
   _cplex.solve();
   if (_cplex.getStatus() == IloAlgorithm::Infeasible)
@@ -579,8 +585,8 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
     return false;
   }
   
-  std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
-  std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+  std::cerr << "Obj value: " << _cplex.getObjValue() << std::endl;
+  std::cerr << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
   
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
   _solPi = DoubleVector(_k);
