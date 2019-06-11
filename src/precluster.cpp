@@ -72,17 +72,17 @@ void PreCluster::run(const IntVector& snvIndices,
       }
     }
     
-    HardPreClusterIlpAlg solver(R, k, nrSegments, statType, precisionBetaBin, true);
+    PreClusterIlpAlg solver(R, k, log(nrSegments) / log(2), statType, precisionBetaBin, true);
     solver.init();
     solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
     
     double b = log(nrObservations) * nrParameters - 2 * solver.getLogLikelihood();
     std::cerr << "k = " << k << " -- Log likelihood " << solver.getLogLikelihood() << " -- BIC " << b << std::endl;
     
-    if (solver.getLogLikelihood() == INFINITY)
-    {
-      continue;
-    }
+//    if (solver.getLogLikelihood() == INFINITY)
+//    {
+//      continue;
+//    }
     
     if (b < min_bic)
     {

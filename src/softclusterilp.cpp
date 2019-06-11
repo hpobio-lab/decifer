@@ -72,6 +72,7 @@ void SoftClusterIlp::initPWLA()
   }
   
   // compute hatG
+  const double infeasible_log = -1e300;
   _hatG = Double5Matrix(n);
   for (int i = 0; i < n; ++i)
   {
@@ -95,18 +96,18 @@ void SoftClusterIlp::initPWLA()
             double h = (_coord[alpha] - _numerator[i][t][p]) / _denominator[i][p];
             if (h <= 0 || !g_tol.nonZero(h))
             {
-              _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+              _hatG[i][t][j][p][alpha] = infeasible_log;//log(g_tol.epsilon());
             }
             else if (h >= 1 || g_tol.less(1, h))
             {
-              _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+              _hatG[i][t][j][p][alpha] = infeasible_log;//log(g_tol.epsilon());
             }
             else
             {
               double likelihood = getLogLikelihood(var_ip, ref_ip, h);
-              if (likelihood < log(g_tol.epsilon()))
+              if (likelihood < infeasible_log)//log(g_tol.epsilon()))
               {
-                _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+                _hatG[i][t][j][p][alpha] = infeasible_log;//log(g_tol.epsilon());
               }
               else
               {

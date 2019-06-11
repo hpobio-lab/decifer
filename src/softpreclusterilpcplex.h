@@ -1,17 +1,17 @@
 /*
- * hardpreclusterilpcplex.h
+ * softpreclusterilpcplex.h
  *
- *  Created on: 7-jun-2019
+ *  Created on: 11-jun-2019
  *      Author: M. El-Kebir
  */
 
-#ifndef HARDPRECLUSTERILPCPLEX_H
-#define HARDPRECLUSTERILPCPLEX_H
+#ifndef SOFTPRECLUSTERILPCPLEX_H
+#define SOFTPRECLUSTERILPCPLEX_H
 
-#include "hardclusterilp.h"
+#include "softclusterilp.h"
 #include <ilcplex/ilocplex.h>
 
-class HardPreClusterIlpCplex : public HardClusterIlp
+class SoftPreClusterIlpCplex : public SoftClusterIlp
 {
 public:
   /// Constructor
@@ -22,13 +22,13 @@ public:
   /// @param statType Summary statistic to use for clustering
   /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param includePi Include pi in optimization
-  HardPreClusterIlpCplex(const ReadMatrix& R,
+  SoftPreClusterIlpCplex(const ReadMatrix& R,
                          int k,
-                         int nrSegments,
+                         int nrSegmentBits,
                          ClusterStatisticType statType,
                          double precisionBetaBin,
                          bool includePi);
-
+  
   /// Export ILP
   ///
   /// @param filename Filename
@@ -56,7 +56,7 @@ public:
   }
   
   /// Destructor
-  virtual ~HardPreClusterIlpCplex()
+  virtual ~SoftPreClusterIlpCplex()
   {
     _env.end();
   }
@@ -76,7 +76,15 @@ public:
     return _solZ[i];
   }
   
-protected:  
+protected:
+  /// Initialize pre clustering constraint
+  ///
+  /// @param i1 SNV
+  /// @param i2 SNV
+  virtual void initPreClusteringConstraint(int i1, int i2)
+  {
+  }
+  
   /// Initialize variables
   virtual void initVariables();
   
@@ -86,6 +94,26 @@ protected:
   /// Initialize objective function
   virtual void initObjective();
   
+  /// Convert binary number to gray
+  unsigned int binaryToGray(unsigned int num)
+  {
+    num = _nrSegments - num - 2;
+    unsigned int val = num ^ (num >> 1);
+    
+    // reverse
+    unsigned int reverse_val = 0;
+    for (int i = 0; i < _nrSegmentBits; ++i)
+    {
+      unsigned int bit = (val & (1 << (_nrSegmentBits - i - 1)));
+      if (bit)
+      {
+        reverse_val |= (1 << i);
+      }
+    }
+    
+    return reverse_val;
+  }
+  
 private:
   typedef IloArray<IloBoolVarArray> IloBoolVarMatrix;
   typedef IloArray<IloBoolVarMatrix> IloBoolVar3Matrix;
@@ -93,16 +121,19 @@ private:
   typedef IloArray<IloNumVarMatrix> IloNumVar3Matrix;
   typedef IloArray<IloNumVar3Matrix> IloNumVar4Matrix;
   typedef IloArray<IloNumVar4Matrix> IloNumVar5Matrix;
+  typedef IloArray<IloNumVar5Matrix> IloNumVar6Matrix;
   
   /// Include pi in optmization
   const bool _includePi;
+  /// Number of bits to model segments for piecewise linear approximation
+  const int _nrSegmentBits;
   /// Environment
   IloEnv _env;
   /// CPlex model
   IloModel _model;
   /// Solver
   IloCplex _cplex;
-  /// y[i][t][j] = 1 iff state tree t and cluster j for SNV i
+  /// y[i][t][j] -- posterior probability of state tree t and cluster j for SNV i
   IloNumVar3Matrix _y;
   /// d[j][p]
   IloNumVarMatrix _d;
@@ -110,16 +141,20 @@ private:
   IloNumVarArray _pi;
   /// gamma[j][alpha]
   IloNumVarMatrix _gamma;
+  /// ggamma[j][alpha]
+  IloNumVarMatrix _ggamma;
+  /// bggamma[j][beta]
+  IloBoolVarMatrix _bggamma;
   /// lambda[i][t][j][p][alpha]
   IloNumVar5Matrix _lambda;
   /// llambda[j][p][alpha]
   IloNumVar3Matrix _llambda;
+  /// bllambda[j][p][beta]
+  IloBoolVar3Matrix _bllambda;
   /// w[j][t] = 1 iff tree t of cluster j is used
-  IloBoolVarMatrix _w;
+  IloNumVarMatrix _w;
   /// z[i][j] = 1 iff SNV i is assigned to cluster j
   IloBoolVarMatrix _z;
-  /// Cluster assignment
-  IntVector _solZ;
 };
 
-#endif // HARDPRECLUSTERILPCPLEX_H
+#endif // SOFTPRECLUSTERILPCPLEX_H

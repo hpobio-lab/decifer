@@ -13,7 +13,7 @@
 #include "solver.h"
 
 #ifdef CPLEX
-  #include "hardpreclusterilpcplex.h"
+  #include "softpreclusterilpcplex.h"
 #else
 #endif
 
@@ -22,7 +22,7 @@ class PreCluster
 public:
   
 #ifdef CPLEX
-  typedef HardPreClusterIlpCplex HardPreClusterIlpAlg;
+  typedef SoftPreClusterIlpCplex PreClusterIlpAlg;
 #endif
   
   /// Constructor

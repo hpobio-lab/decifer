@@ -211,6 +211,7 @@ if (CPLEX)
     src/posteriorstatetree.cpp
     src/precluster.cpp
     src/hardpreclusterilpcplex.cpp
+    src/softpreclusterilpcplex.cpp
   )
 
   set( decifer_hdr
@@ -238,6 +239,7 @@ if (CPLEX)
     src/posteriorstatetree.h
     src/precluster.h
     src/hardpreclusterilpcplex.h
+    src/softpreclusterilpcplex.h
   )
 
   set( precluster_src
@@ -251,6 +253,8 @@ if (CPLEX)
     src/solver.cpp
     src/precluster.cpp
     src/hardpreclusterilpcplex.cpp
+    src/softpreclusterilpcplex.cpp
+    src/softclusterilp.cpp
   )
 
   set( precluster_hdr
@@ -263,6 +267,8 @@ if (CPLEX)
     src/solver.h
     src/precluster.h
     src/hardpreclusterilpcplex.h
+    src/softpreclusterilpcplex.h
+    src/softclusterilp.h
   )
 else()
   set( decifer_src

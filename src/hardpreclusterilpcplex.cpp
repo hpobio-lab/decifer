@@ -356,6 +356,10 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
     _cplex.setWarning(_env.getNullStream());
   }
   
+  // TODO: remove me
+//  _model.add(_d[0][0] >= .5);
+//  _model.add(_w[0][6] == 1);
+  
   _cplex.solve();
   if (_cplex.getStatus() == IloAlgorithm::Infeasible)
   {
@@ -367,8 +371,8 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
     return false;
   }
   
-  //  std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
-  //  std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+    std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
+    std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
   
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
   for (int j = 0; j < _k; ++j)
@@ -398,24 +402,29 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
         _solY[i][t][j] = (_cplex.getValue(_y[i][t][j]) >= 0.4);
         if (_solY[i][t][j])
         {
-          //          double sum = 0;
-          //          for (int l = 0; l < _nrSegments; ++l)
-          //          {
-          //            sum += _hatN[l] * _cplex.getValue(_gamma[i][t][j][l]);
-          //          }
-          
-          //          for (int p = 0; p < m; ++p)
-          //          {
-          //            for (int l = 0; l < _nrSegments; ++l)
-          //            {
-          //              sum += _hatG[i][t][j][p][l] * _cplex.getValue(_lambda[i][t][j][p][l]);
-          //            }
-          //          }
-          //
-          //          sum += -log(n);
-          //          sum += -log(_scriptT[i].size());
-          
-          //          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
+          double sum = 0;
+          for (int l = 0; l < _nrSegments; ++l)
+          {
+            sum += (_hatPi[l] - log(n)) * _cplex.getValue(_gamma[j][l]);
+          }
+
+          for (int p = 0; p < m; ++p)
+          {
+            for (int l = 0; l < _nrSegments; ++l)
+            {
+              sum += _hatG[i][t][j][p][l] * _cplex.getValue(_lambda[i][t][j][p][l]);
+              if (_cplex.getValue(_lambda[i][t][j][p][l]) > 0.01)
+              {
+                std::cout << _lambda[i][t][j][p][l] << " = " << _cplex.getValue(_lambda[i][t][j][p][l])
+                          << " (" << _hatG[i][t][j][p][l] << ")" << std::endl;
+              }
+            }
+          }
+
+          sum += -log(n);
+          sum += -log(_scriptT[i].size());
+
+          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
           
           _solT.emplace_back(convertToStateTreeFromDCF(_scriptT[i][t],
                                                        _solD[j], i));
@@ -444,6 +453,18 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
       {
         assert(_solZ[i] == -1);
         _solZ[i] = j;
+      }
+    }
+  }
+  
+  const int size_T = _scriptT[0].size();
+  for (int j = 0; j < _k; ++j)
+  {
+    for (int t = 0; t < size_T; ++t)
+    {
+      if (_cplex.getValue(_w[j][t]) > 0.4)
+      {
+        std::cout << _w[j][t] << " = " << _cplex.getValue(_w[j][t]) << std::endl;
       }
     }
   }
