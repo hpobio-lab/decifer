@@ -692,6 +692,24 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
     _solZ.push_back(_solT[i].back()._j);
   }
   
+  for (int i = 0; i < n; ++i)
+  {
+    for (int t = 0; t < _scriptT[i].size(); ++t)
+    {
+      for (int j = 0; j < _k; ++j)
+      {
+        if (g_tol.nonZero(_solY[i][t][j]))
+        {
+          for (int p = 0; p < m; ++p)
+          {
+            _solD[j][p] = std::max(_dLB[i][t][p], _solD[j][p]);
+            _solD[j][p] = std::min(_dUB[i][t][p], _solD[j][p]);
+          }
+        }
+      }
+    }
+  }
+  
   updateLogLikelihood();
   return true;
 }
