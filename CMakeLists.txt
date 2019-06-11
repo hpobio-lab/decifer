@@ -239,6 +239,31 @@ if (CPLEX)
     src/precluster.h
     src/hardpreclusterilpcplex.h
   )
+
+  set( precluster_src
+    src/preclustermain.cpp
+    src/hardclusterilp.cpp
+    src/statetree.cpp
+    src/stategraph.cpp
+    src/readmatrix.cpp
+    src/basematrix.cpp
+    src/utils.cpp
+    src/solver.cpp
+    src/precluster.cpp
+    src/hardpreclusterilpcplex.cpp
+  )
+
+  set( precluster_hdr
+    src/utils.h
+    src/statetree.h
+    src/hardclusterilp.h
+    src/stategraph.h
+    src/readmatrix.h
+    src/basematrix.h
+    src/solver.h
+    src/precluster.h
+    src/hardpreclusterilpcplex.h
+  )
 else()
   set( decifer_src
     src/decifermain.cpp
@@ -482,6 +507,10 @@ add_executable( decifer ${decifer_src} ${decifer_hdr} )
 if (CPLEX)
   target_include_directories( decifer PUBLIC "${LIBLEMON_ROOT}/include" "src" ${Boost_INCLUDE_DIRS} ${CPLEX_INC_DIR} ${CONCERT_INC_DIR} )
   target_link_libraries( decifer ${CommonLibs} ilocplex cplex concert dl )
+
+  add_executable( precluster ${precluster_src} ${precluster_hdr} )
+  target_include_directories( precluster PUBLIC "${LIBLEMON_ROOT}/include" "src" ${Boost_INCLUDE_DIRS} ${CPLEX_INC_DIR} ${CONCERT_INC_DIR} )
+  target_link_libraries( precluster ${CommonLibs} ilocplex cplex concert dl )
 else()
   target_include_directories( decifer PUBLIC "${LIBLEMON_ROOT}/include" "src" ${Boost_INCLUDE_DIRS} ${GUROBI_INCLUDE_DIR} )
   target_link_libraries( decifer ${CommonLibs} ${GUROBI_LIBRARIES} )
@@ -492,5 +521,5 @@ target_include_directories( summarize PUBLIC "${LIBLEMON_ROOT}/include" "src" ${
 target_link_libraries( summarize ${CommonLibs} dl )
 
 if (PYTHON)
-  addPythonMod(decifermod src/python.cpp )
+  addPythonMod( decifermod src/python.cpp )
 endif()

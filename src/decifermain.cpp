@@ -628,7 +628,7 @@ int main(int argc, char** argv)
   bool writeStateTrees = false;
   if (!stateTreeFilename.empty())
   {
-    std::ifstream inS(stateTreeFilename);
+    std::ifstream inS(stateTreeFilename.c_str());
     if (!inS.good())
     {
       std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading. Will generate state tree file." << std::endl;
