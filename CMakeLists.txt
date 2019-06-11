@@ -208,8 +208,6 @@ if (CPLEX)
     src/clusterilpcplex.h
     src/softclusterilp.h
     src/softclusterilpcplex.h
-    src/softclusterilpcplexcallback.h
-    src/softclusterlpcplexcallback.h
     src/softclusterlpcplex.h
     src/softclusterlpcplexext.h
     src/stategraph.h
