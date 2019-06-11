@@ -149,6 +149,23 @@ set( visualizestatetree_hdr
   src/statetree.h
 )
 
+set( mergestatetrees_src
+  src/mergestatetreesmain.cpp
+  src/statetree.cpp
+  src/stategraph.cpp
+  src/utils.cpp
+  src/readmatrix.cpp
+  src/basematrix.cpp
+)
+
+set( mergestatetrees_hdr
+  src/statetree.h
+  src/stategraph.h
+  src/utils.h
+  src/readmatrix.h
+  src/basematrix.h
+)
+
 set( generatestatetrees_src
   src/generatestatetreesmain.cpp
   src/statetree.cpp
@@ -451,6 +468,9 @@ target_link_libraries( visualizepoststatetree ${CommonLibs} )
 
 add_executable( generate EXCLUDE_FROM_ALL ${generate_src} ${generate_hdr} )
 target_link_libraries( generate ${CommonLibs} )
+
+add_executable( mergestatetrees ${mergestatetrees_src} ${mergestatetrees_hdr} )
+target_link_libraries( mergestatetrees ${CommonLibs} )
 
 add_executable( generatestatetrees ${generatestatetrees_src} ${generatestatetrees_hdr} )
 target_link_libraries( generatestatetrees ${CommonLibs} )
