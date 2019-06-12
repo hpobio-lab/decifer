@@ -585,8 +585,11 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
     return false;
   }
   
-  std::cerr << "Obj value: " << _cplex.getObjValue() << std::endl;
-  std::cerr << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+  if (verbose)
+  {
+    std::cerr << "Obj value: " << _cplex.getObjValue() << std::endl;
+    std::cerr << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+  }
   
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
   _solPi = DoubleVector(_k);

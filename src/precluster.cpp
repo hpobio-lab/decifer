@@ -58,41 +58,52 @@ void PreCluster::run(const IntVector& snvIndices,
   IntVector solZ;
   int selected_k = -1;
   
-  const size_t max_k = std::min((size_t)10, snvIndices.size());
-  for (int k = 1; k <= max_k; ++k)
+  if (snvIndices.size() == 1)
   {
-    int nrParameters = R.getNrSamples() * (k+1);
+    selected_k = 1;
+    solZ.push_back(0);
+  }
+  else
+  {
+    const size_t max_k = std::min((size_t)10, snvIndices.size());
+    for (int k = 1; k <= max_k; ++k)
     {
-      Solver solver(R, k, 0, statType, precisionBetaBin, false);
-      solver.init();
-      
-      for (int i = 0; i < R.getNrCharacters(); ++i)
+      int nrParameters = R.getNrSamples() * (k+1);
       {
-        nrParameters += k * solver.getScriptT(i).size() * k;
+        Solver solver(R, k, 0, statType, precisionBetaBin, false);
+        solver.init();
+        
+        for (int i = 0; i < R.getNrCharacters(); ++i)
+        {
+          nrParameters += k * solver.getScriptT(i).size() * k;
+        }
       }
-    }
-    
-    PreClusterIlpAlg solver(R, k, log(nrSegments) / log(2), statType, precisionBetaBin, true);
-    solver.init();
-    solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
-    
-    double b = log(nrObservations) * nrParameters - 2 * solver.getLogLikelihood();
-    std::cerr << "k = " << k << " -- Log likelihood " << solver.getLogLikelihood() << " -- BIC " << b << std::endl;
-    
-//    if (solver.getLogLikelihood() == INFINITY)
-//    {
-//      continue;
-//    }
-    
-    if (b < min_bic)
-    {
-      min_bic = b;
-      solZ = solver.getSolZ();
-      selected_k = k;
-    }
-    else
-    {
-      break;
+      
+      PreClusterIlpAlg solver(R, k, nrSegments, statType, precisionBetaBin, true);
+      solver.init();
+      solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
+      
+      double b = log(nrObservations) * nrParameters - 2 * solver.getLogLikelihood();
+      std::cerr << "k = " << k << " -- Log likelihood " << solver.getLogLikelihood() << " -- BIC " << b << std::endl;
+      
+  //    if (solver.getLogLikelihood() == INFINITY)
+  //    {
+  //      continue;
+  //    }
+      
+      if (b == INFINITY)
+        continue;
+      
+      if (b < min_bic)
+      {
+        min_bic = b;
+        solZ = solver.getSolZ();
+        selected_k = k;
+      }
+      else
+      {
+        break;
+      }
     }
   }
   
