@@ -379,8 +379,8 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
   
   if (verbose)
   {
-    std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
-    std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
+    std::cerr << "Obj value: " << _cplex.getObjValue() << std::endl;
+    std::cerr << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
   }
   
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
