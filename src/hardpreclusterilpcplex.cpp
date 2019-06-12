@@ -355,6 +355,12 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
     _cplex.setError(_env.getNullStream());
     _cplex.setWarning(_env.getNullStream());
   }
+  else
+  {
+    _cplex.setOut(std::cerr);
+    _cplex.setError(std::cerr);
+    _cplex.setWarning(std::cerr);
+  }
   
   // TODO: remove me
 //  _model.add(_d[0][0] >= .5);
