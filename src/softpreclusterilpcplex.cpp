@@ -468,6 +468,8 @@ void SoftPreClusterIlpCplex::initConstraints()
     {
       for (int j = 0; j < _k; ++j)
       {
+        _model.add(_y[i][t][j] <= _z[i][j]);
+        _model.add(_y[i][t][j] <= _w[j][t]);
         _model.add(_y[i][t][j] >= _w[j][t] + _z[i][j] - 1);
       }
     }
@@ -670,7 +672,6 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
   }
 
   _solT = PosteriorStateTreeMatrix(n);
-  _solZ.clear();
   _solY = DoubleTensor(n);
   for (int i = 0; i < n; ++i)
   {
@@ -695,10 +696,6 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
         }
       }
     }
-
-    // TODO: shouldn't we sort?
-    assert(!_solT[i].empty());
-    _solZ.push_back(_solT[i].back()._j);
   }
   
   for (int i = 0; i < n; ++i)
@@ -715,6 +712,18 @@ bool SoftPreClusterIlpCplex::solve(int nrThreads,
             _solD[j][p] = std::min(_dUB[i][t][p], _solD[j][p]);
           }
         }
+      }
+    }
+  }
+  
+  _solZ = IntVector(n, -1);
+  for (int i = 0; i < n; ++i)
+  {
+    for (int j = 0; j < _k; ++j)
+    {
+      if (_cplex.getValue(_z[i][j]) >= .4)
+      {
+        _solZ[i] = j;
       }
     }
   }

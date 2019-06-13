@@ -42,12 +42,21 @@ void HardClusterIlpCplex::initPreClusteringConstraint(int i1, int i2)
 {
   assert(_scriptT[i1].size() == _scriptT[i2].size());
   
+  const int m = _R.getNrSamples();
   const int scriptT_size = _scriptT[i1].size();
   for (int t = 0; t < scriptT_size; ++t)
   {
     for (int j = 0; j < _k; ++j)
     {
       _model.add(_y[i1][t][j] == _y[i2][t][j]);
+      
+      for (int p = 0; p < m; ++p)
+      {
+        for (int alpha = 0; alpha < _nrSegments; ++alpha)
+        {
+          _model.add(_lambda[i1][t][j][p][alpha] == _lambda[i2][t][j][p][alpha]);
+        }
+      }
     }
   }
 }
