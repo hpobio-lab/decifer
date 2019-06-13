@@ -80,11 +80,11 @@ void PreCluster::run(const IntVector& snvIndices,
         }
       }
       
-      PreClusterIlpAlg solver(R, k, nrSegments, statType, precisionBetaBin, true);
-//      PreClusterKMeans solver(R, k, statType, precisionBetaBin);
+//      PreClusterIlpAlg solver(R, k, nrSegments, statType, precisionBetaBin, true);
+      PreClusterKMeans solver(R, k, statType, precisionBetaBin);
       solver.init();
-//      solver.solve(1, verbose);
-      solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
+      solver.solve(10, verbose);
+//      solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
       
       double b = log(nrObservations) * nrParameters - 2 * solver.getLogLikelihood();
       std::cerr << "k = " << k << " -- Log likelihood " << solver.getLogLikelihood() << " -- BIC " << b << std::endl;

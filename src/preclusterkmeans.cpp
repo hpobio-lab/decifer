@@ -54,7 +54,7 @@ bool PreClusterKMeans::solve(int nrRestarts,
       z[i] = assignment[i];
     }
     
-    SoftPreClusterIlpCplex solver(_R, _k, 5, _statType, _precisionBetaBin, true);
+    SoftPreClusterIlpCplex solver(_R, _k, log(_nrSegments) / log(2), _statType, _precisionBetaBin, false);
     solver.init();
     solver.initZ(z);
     solver.solve(1, -1, verbose, -1);
