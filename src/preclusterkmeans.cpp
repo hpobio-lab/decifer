@@ -12,9 +12,10 @@
 
 PreClusterKMeans::PreClusterKMeans(const ReadMatrix& R,
                                    int k,
+                                   int nrSegments,
                                    ClusterStatisticType statType,
                                    double precisionBetaBin)
-  : Solver(R, k, 0, statType, precisionBetaBin, false)
+  : Solver(R, k, nrSegments, statType, precisionBetaBin, false)
 {
 }
 

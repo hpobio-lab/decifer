@@ -22,10 +22,12 @@ public:
   ///
   /// @param R Read matrix
   /// @param k Number of clusters
+  /// @param nrSegments Number of segments for piecewise linear approximation
   /// @param statType Summary statistic to use for clustering
   /// @param precisionBetaBin Precision parameter for beta binomial
   PreClusterKMeans(const ReadMatrix& R,
                    int k,
+                   int nrSegments,
                    ClusterStatisticType statType,
                    double precisionBetaBin);
   

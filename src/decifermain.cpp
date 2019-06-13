@@ -548,7 +548,7 @@ int main(int argc, char** argv)
   int min_k = -1;
   int globalTimeLimit = -1;
   int k = -1;
-  int nrSegments = 50;
+  int nrSegments = 32;
   int nrRestarts = 10;
   int maxIterations = 50;
   int nrThreads = -1;
@@ -584,7 +584,7 @@ int main(int argc, char** argv)
                     "     4 -- Hard clustering with probabilistic likelihood function\n" \
                     "     5 -- Expectation-Maximization using hard clustering with distance-based likelihood function", method, false)
     .refOption("k", "Number of clusters", k, true)
-    .refOption("i", "Maximum number of iterations during EM (default: 50)", maxIterations)
+    .refOption("i", "Maximum number of iterations during EM (default: 32)", maxIterations)
     .refOption("t", "Number of threads (default: -1, limited by CPU)", nrThreads)
     .refOption("tl", "Time limit in seconds (default: -1, unlimited)", timeLimit)
     .refOption("TL", "Global time limit in seconds (default: -1, unlimited)", globalTimeLimit)
