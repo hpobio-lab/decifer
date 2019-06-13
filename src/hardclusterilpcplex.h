@@ -30,6 +30,11 @@ public:
                       double precisionBetaBin,
                       bool forceTruncal,
                       bool includePi);
+  
+  /// Initialize pre clustering constraints
+  ///
+  /// @param preClustering Pre clustering
+  virtual void initPreClusteringConstraints(const IntMatrix& preClustering);
 
   /// Export ILP
   ///
@@ -70,6 +75,12 @@ protected:
   
   /// Initialize objective function
   virtual void initObjective();
+  
+  /// Initialize pre clustering constraint
+  ///
+  /// @param i1 SNV
+  /// @param i2 SNV
+  virtual void initPreClusteringConstraint(int i1, int i2);
   
 private:
   typedef IloArray<IloBoolVarArray> IloBoolVarMatrix;

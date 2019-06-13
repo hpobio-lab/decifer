@@ -291,11 +291,16 @@ Solution runHardCluster(const ReadMatrix& R,
                         bool verbose,
                         int memoryLimit,
                         bool forceTruncal,
-                        double betaBin)
+                        double betaBin,
+                        const IntMatrix& preClustering)
 {
   HardClusterIlpAlg solver(R, k, nrSegments, statType, betaBin, forceTruncal, false);
   solver.init();
   solver.initHotStart(prevSolution);
+  if (!preClustering.empty())
+  {
+    solver.initPreClusteringConstraints(preClustering);
+  }
   
   double logLikelihood = -std::numeric_limits<double>::max();
   if (solver.solve(nrThreads, timeLimit, verbose, memoryLimit))
@@ -494,7 +499,8 @@ Solution run(const ReadMatrix& R,
                             verbose,
                             memoryLimit,
                             forceTruncal,
-                            betaBin);
+                            betaBin,
+                            preClustering);
     case 5:
       return runEM(R, statType, k,
                    nrSegments, seed,

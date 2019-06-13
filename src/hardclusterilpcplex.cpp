@@ -26,6 +26,33 @@ HardClusterIlpCplex::HardClusterIlpCplex(const ReadMatrix& R,
 {
 }
 
+void HardClusterIlpCplex::initPreClusteringConstraints(const IntMatrix& preClustering)
+{
+  for (const IntVector& preCluster : preClustering)
+  {
+    const int size = preCluster.size();
+    for (int i = 1; i < size; ++i)
+    {
+      initPreClusteringConstraint(preCluster[i-1], preCluster[i]);
+    }
+  }
+}
+
+void HardClusterIlpCplex::initPreClusteringConstraint(int i1, int i2)
+{
+  assert(_scriptT[i1].size() == _scriptT[i2].size());
+  
+  const int scriptT_size = _scriptT[i1].size();
+  for (int t = 0; t < scriptT_size; ++t)
+  {
+    for (int j = 0; j < _k; ++j)
+    {
+      _model.add(_y[i1][t][j] == _y[i2][t][j]);
+    }
+  }
+}
+
+
 void HardClusterIlpCplex::initHotStart(const BoolTensor& y)
 {
   const int n = _R.getNrCharacters();
