@@ -48,6 +48,19 @@ public:
                      bool verbose,
                      int memoryLimit);
   
+  /// Initialize cluster assignment
+  void initZ(const IntVector& z)
+  {
+    const int n = _R.getNrCharacters();
+    assert(z.size() == n);
+    
+    for (int i = 0; i < n; ++i)
+    {
+      assert(0 <= z[i] && z[i] < _k);
+      _model.add(_z[i][z[i]] == 1);
+    }
+  }
+  
   /// Initialize hot start
   ///
   /// @param y Clustering and state tree assignment
@@ -59,21 +72,6 @@ public:
   virtual ~SoftPreClusterIlpCplex()
   {
     _env.end();
-  }
-  
-  /// Cluster assignment
-  const IntVector& getSolZ() const
-  {
-    return _solZ;
-  }
-  
-  /// Cluster assignment
-  ///
-  /// @param i SNV
-  const int getSolZ(int i) const
-  {
-    assert(0 <= i && i < _R.getNrCharacters());
-    return _solZ[i];
   }
   
 protected:

@@ -112,11 +112,12 @@ void Solver::initPWLA()
   }
 }
 
-StateTree Solver::convertToStateTreeFromSNVF(const StateEdgeSet& T_it,
+StateTree Solver::convertToStateTreeFromSNVF(const ReadMatrix& R,
+                                             const StateEdgeSet& T_it,
                                              const DoubleVector& f_i,
-                                             const int i) const
+                                             const int i)
 {
-  assert(_R.getNrSamples() == f_i.size());
+  assert(R.getNrSamples() == f_i.size());
   
   IntVector pi;
   std::map<StateGraph::CnaTriple, int> vertices;
@@ -150,7 +151,7 @@ StateTree Solver::convertToStateTreeFromSNVF(const StateEdgeSet& T_it,
   for (int p = 0; p < f_i.size(); ++p)
   {
     double muTotal = 0;
-    for (const ReadMatrix::CopyNumberState& cnState : _R.getCopyNumberStates(p, i))
+    for (const ReadMatrix::CopyNumberState& cnState : R.getCopyNumberStates(p, i))
     {
       muTotal += (cnState._x + cnState._y) * cnState._mu;
     }
@@ -160,11 +161,11 @@ StateTree Solver::convertToStateTreeFromSNVF(const StateEdgeSet& T_it,
     {
       if (kv.first._x != mutationVertex._x || kv.first._y != mutationVertex._y)
       {
-        muMut += kv.first._z * _R.getMu(p, i, kv.first._x, kv.first._y);
+        muMut += kv.first._z * R.getMu(p, i, kv.first._x, kv.first._y);
       }
     }
     
-    double muStar = _R.getMu(p, i, mutationVertex._x, mutationVertex._y);
+    double muStar = R.getMu(p, i, mutationVertex._x, mutationVertex._y);
     
     const double h_ip = f_i[p];
     
@@ -177,7 +178,7 @@ StateTree Solver::convertToStateTreeFromSNVF(const StateEdgeSet& T_it,
       
       if (kv.first._x != mutationVertex._x || kv.first._y != mutationVertex._y)
       {
-        S_it.setMixtureProportion(kv.second, _R.getMu(p, i, kv.first._x, kv.first._y));
+        S_it.setMixtureProportion(kv.second, R.getMu(p, i, kv.first._x, kv.first._y));
       }
       else if (kv.first._x == mutationVertex._x && kv.first._y == mutationVertex._y && kv.first._z == 1)
       {
@@ -199,11 +200,12 @@ StateTree Solver::convertToStateTreeFromSNVF(const StateEdgeSet& T_it,
   return S_it;
 }
 
-StateTree Solver::convertToStateTreeFromDCF(const StateEdgeSet& T_it,
+StateTree Solver::convertToStateTreeFromDCF(const ReadMatrix& R,
+                                            const StateEdgeSet& T_it,
                                             const DoubleVector& d_i,
-                                            const int i) const
+                                            const int i)
 {
-  assert(_R.getNrSamples() == d_i.size());
+  assert(R.getNrSamples() == d_i.size());
 
   // parent vector
   IntVector pi;
@@ -255,22 +257,22 @@ StateTree Solver::convertToStateTreeFromDCF(const StateEdgeSet& T_it,
       {
         if (x == mutationVertex._x && y == mutationVertex._y && z == mutationVertex._z)
         {
-          massMut = _R.getMu(p, i, x, y);
+          massMut = R.getMu(p, i, x, y);
         }
         else if (verticesPreMut.count(StateGraph::CnaTriple(x, y, z)) == 1)
         {
-          massPreMut += _R.getMu(p, i, x, y);
+          massPreMut += R.getMu(p, i, x, y);
         }
         else
         {
           assert(verticesPostMut.count(StateGraph::CnaTriple(x, y, z)) == 1);
-          massPostMut += _R.getMu(p, i, x, y);
+          massPostMut += R.getMu(p, i, x, y);
         }
       }
     }
     
     double muTotal = 0;
-    for (const ReadMatrix::CopyNumberState& cnState : _R.getCopyNumberStates(p, i))
+    for (const ReadMatrix::CopyNumberState& cnState : R.getCopyNumberStates(p, i))
     {
       muTotal += (cnState._x + cnState._y) * cnState._mu;
     }
@@ -281,7 +283,7 @@ StateTree Solver::convertToStateTreeFromDCF(const StateEdgeSet& T_it,
     {
       if (kv.first._x != mutationVertex._x || kv.first._y != mutationVertex._y)
       {
-        muMut += kv.first._z * _R.getMu(p, i, kv.first._x, kv.first._y);
+        muMut += kv.first._z * R.getMu(p, i, kv.first._x, kv.first._y);
       }
     }
     
@@ -295,7 +297,7 @@ StateTree Solver::convertToStateTreeFromDCF(const StateEdgeSet& T_it,
       
       if (kv.first._x != mutationVertex._x || kv.first._y != mutationVertex._y)
       {
-        S_it.setMixtureProportion(kv.second, _R.getMu(p, i, kv.first._x, kv.first._y));
+        S_it.setMixtureProportion(kv.second, R.getMu(p, i, kv.first._x, kv.first._y));
       }
       else if (kv.first._x == mutationVertex._x && kv.first._y == mutationVertex._y && kv.first._z == 1)
       {

@@ -283,7 +283,7 @@ bool EM::solve(int restart,
             h_i.push_back((_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p]);
           }
           
-          _solT[i].emplace_back(convertToStateTreeFromSNVF(_scriptT[i][t],
+          _solT[i].emplace_back(convertToStateTreeFromSNVF(_R, _scriptT[i][t],
                                                            h_i, i),
                                 gamma_itj, t, j);
         }

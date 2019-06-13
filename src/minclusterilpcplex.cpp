@@ -252,7 +252,8 @@ bool MinClusterIlpCplex::solve(int nrThreads, int timeLimit)
       {
         if (_cplex.getValue(_y[i][t][j]) >= 0.4)
         {
-          _solT.emplace_back(convertToStateTreeFromDCF(_scriptT[i][t],
+          _solT.emplace_back(convertToStateTreeFromDCF(_R,
+                                                       _scriptT[i][t],
                                                        _solD[j], i));
           _solZ.push_back(j);
           ++_solPi[j];

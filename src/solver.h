@@ -22,6 +22,10 @@ public:
     CLUSTER_DCF
   };
   
+  typedef StateGraph::StateEdgeSet StateEdgeSet;
+  typedef std::vector<StateEdgeSet> StateEdgeSetVector;
+  typedef std::vector<StateEdgeSetVector> StateEdgeSetMatrix;
+  
   /// Constructor
   ///
   /// @param R Read matrix
@@ -41,6 +45,26 @@ public:
   virtual ~Solver()
   {
   }
+  
+  /// Construct a state tree from SNVF vector
+  ///
+  /// @param T_it State tree
+  /// @param f_i SNVF
+  /// @param i SNV
+  static StateTree convertToStateTreeFromSNVF(const ReadMatrix& R,
+                                              const StateEdgeSet& T_it,
+                                              const DoubleVector& f_i,
+                                              const int i);
+  
+  /// Construct a state tree from DCF vector
+  ///
+  /// @param T_it State tree
+  /// @param d_i DCF
+  /// @param i SNV
+  static StateTree convertToStateTreeFromDCF(const ReadMatrix& R,
+                                             const StateEdgeSet& T_it,
+                                             const DoubleVector& d_i,
+                                             const int i);
   
   /// Return DCF
   ///
@@ -148,13 +172,35 @@ public:
     return _nrSegments;
   }
   
+  /// Return state trees
+  ///
+  /// @param i SNV
+  const StateEdgeSetVector& getStateTrees(int i) const
+  {
+    assert(0 <= i && i < _R.getNrCharacters());
+    
+    return _scriptT[i];
+  }
+  
+  /// Cluster assignment
+  const IntVector& getSolZ() const
+  {
+    return _solZ;
+  }
+  
+  /// Cluster assignment
+  ///
+  /// @param i SNV
+  const int getSolZ(int i) const
+  {
+    assert(0 <= i && i < _R.getNrCharacters());
+    return _solZ[i];
+  }
+  
 protected:
   typedef ReadMatrix::CopyNumberStateVector CopyNumberStateVector;
   typedef std::vector<IntPair> IntPairVector;
   typedef std::vector<IntPairVector> IntPairMatrix;
-  typedef StateGraph::StateEdgeSet StateEdgeSet;
-  typedef std::vector<StateEdgeSet> StateEdgeSetVector;
-  typedef std::vector<StateEdgeSetVector> StateEdgeSetMatrix;
   typedef std::vector<DoubleTensor> Double4Matrix;
   typedef std::vector<Double4Matrix> Double5Matrix;
   
@@ -173,24 +219,6 @@ protected:
                   const CopyNumberStateVector& cnStates,
                   const StateEdgeSet& T_it,
                   const int maxCopyNumber) const;
-  
-  /// Construct a state tree from SNVF vector
-  ///
-  /// @param T_it State tree
-  /// @param f_i SNVF
-  /// @param i SNV
-  StateTree convertToStateTreeFromSNVF(const StateEdgeSet& T_it,
-                                       const DoubleVector& f_i,
-                                       const int i) const;
-  
-  /// Construct a state tree from DCF vector
-  ///
-  /// @param T_it State tree
-  /// @param d_i DCF
-  /// @param i SNV
-  StateTree convertToStateTreeFromDCF(const StateEdgeSet& T_it,
-                                      const DoubleVector& d_i,
-                                      const int i) const;
   
   /// Return whether state tree T_(i,t) is enabled for SNV i
   ///

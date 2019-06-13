@@ -61,21 +61,6 @@ public:
     _env.end();
   }
   
-  /// Cluster assignment
-  const IntVector& getSolZ() const
-  {
-    return _solZ;
-  }
-  
-  /// Cluster assignment
-  ///
-  /// @param i SNV
-  const int getSolZ(int i) const
-  {
-    assert(0 <= i && i < _R.getNrCharacters());
-    return _solZ[i];
-  }
-  
 protected:  
   /// Initialize variables
   virtual void initVariables();
@@ -118,8 +103,6 @@ private:
   IloBoolVarMatrix _w;
   /// z[i][j] = 1 iff SNV i is assigned to cluster j
   IloBoolVarMatrix _z;
-  /// Cluster assignment
-  IntVector _solZ;
 };
 
 #endif // HARDPRECLUSTERILPCPLEX_H

@@ -185,6 +185,25 @@ set( generatestatetrees_hdr
   src/solver.h
 )
 
+set( analyze_src
+  src/analyzemain.cpp
+  src/statetree.cpp
+  src/stategraph.cpp
+  src/utils.cpp
+  src/readmatrix.cpp
+  src/basematrix.cpp
+  src/solver.cpp
+)
+
+set( analyze_hdr
+  src/statetree.h
+  src/stategraph.h
+  src/utils.h
+  src/readmatrix.h
+  src/basematrix.h
+  src/solver.h
+)
+
 if (CPLEX)
   set( decifer_src
     src/incrementalsolver.cpp
@@ -212,6 +231,8 @@ if (CPLEX)
     src/precluster.cpp
     src/hardpreclusterilpcplex.cpp
     src/softpreclusterilpcplex.cpp
+    src/incrementalpreclustersolver.cpp
+    src/preclusterkmeans.cpp
   )
 
   set( decifer_hdr
@@ -240,6 +261,8 @@ if (CPLEX)
     src/precluster.h
     src/hardpreclusterilpcplex.h
     src/softpreclusterilpcplex.h
+    src/incrementalpreclustersolver.h
+    src/preclusterkmeans.h
   )
 
   set( precluster_src
@@ -255,6 +278,8 @@ if (CPLEX)
     src/hardpreclusterilpcplex.cpp
     src/softpreclusterilpcplex.cpp
     src/softclusterilp.cpp
+    src/incrementalpreclustersolver.cpp
+    src/preclusterkmeans.cpp
   )
 
   set( precluster_hdr
@@ -269,6 +294,10 @@ if (CPLEX)
     src/hardpreclusterilpcplex.h
     src/softpreclusterilpcplex.h
     src/softclusterilp.h
+    src/incrementalpreclustersolver.h
+    src/preclusterkmeans.h
+    src/dkm/dkm.hpp
+    src/dkm/dkm_utils.hpp
   )
 else()
   set( decifer_src
@@ -525,6 +554,10 @@ endif()
 add_executable( summarize ${summarize_src} ${summarize_hdr} )
 target_include_directories( summarize PUBLIC "${LIBLEMON_ROOT}/include" "src" ${Boost_INCLUDE_DIRS} )
 target_link_libraries( summarize ${CommonLibs} dl )
+
+add_executable( analyze ${analyze_src} ${analyze_hdr} )
+target_include_directories( analyze PUBLIC "${LIBLEMON_ROOT}/include" "src" ${Boost_INCLUDE_DIRS} )
+target_link_libraries( analyze ${CommonLibs} dl )
 
 if (PYTHON)
   addPythonMod( decifermod src/python.cpp )

@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     std::ifstream inS(stateTreeFilename.c_str());
     if (!inS.good())
     {
-      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading. Will generate state tree file." << std::endl;
+      std::cerr << "Error: could not open '" << stateTreeFilename << "' for reading." << std::endl;
       return 1;
     }
     StateGraph::readStateTrees(inS);

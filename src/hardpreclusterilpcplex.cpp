@@ -435,7 +435,8 @@ bool HardPreClusterIlpCplex::solve(int nrThreads,
 //
 //          std::cout << i << "," << t << "," << j << ": " << sum << std::endl;
           
-          _solT.emplace_back(convertToStateTreeFromDCF(_scriptT[i][t],
+          _solT.emplace_back(convertToStateTreeFromDCF(_R,
+                                                       _scriptT[i][t],
                                                        _solD[j], i));
           _solZ.push_back(j);
           ++_solPi[j];

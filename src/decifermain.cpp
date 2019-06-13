@@ -555,7 +555,7 @@ int main(int argc, char** argv)
   std::string stateTreeFilename;
   double precisionBetaBin = -1;
   bool forceTruncal;
-  bool usePreClustering;
+  std::string preClusteringFilename = "-";
 
   lemon::ArgParser ap(argc, argv);
   ap.refOption("s", "Random number generator seed (default: 0)", seed)
@@ -586,7 +586,7 @@ int main(int argc, char** argv)
     .refOption("v", "Verbose (default: 0)", verbose, false)
     .refOption("ML", "Memory limit", memoryLimit)
     .refOption("S", "State tree file", stateTreeFilename, false)
-    .refOption("P", "Use pre clustering", usePreClustering)
+    .refOption("P", "Pre clustering filename (default: no preclustering)", preClusteringFilename)
     .other("filename");
   ap.parse();
   
@@ -649,12 +649,46 @@ int main(int argc, char** argv)
   std::cerr << "Input:      instance with n = " << R.getNrCharacters() << " SNVs and m = " << R.getNrSamples() << " samples" << std::endl;
   
   IntMatrix preClustering;
-  if (usePreClustering)
+  if (preClusteringFilename.empty())
   {
     PreCluster pc(R);
     pc.run(nrSegments, statType, precisionBetaBin, nrThreads, timeLimit, verbose, memoryLimit);
     
     preClustering = pc.getPreClustering();
+  }
+  else if (preClusteringFilename != "-")
+  {
+    std::ifstream inC(preClusteringFilename.c_str());
+    if (!inC.good())
+    {
+      std::cerr << "Error: failed to open '" << preClusteringFilename << "' for reading" << std::endl;
+      return 1;
+    }
+    else
+    {
+      while (inC.good())
+      {
+        std::string line;
+        getline(inC, line);
+        
+        StringVector s;
+        boost::split(s, line, boost::is_any_of("\t "));
+        
+        IntVector cc;
+        for (const std::string& str : s)
+        {
+          if (str != "")
+          {
+            cc.push_back(boost::lexical_cast<int>(str));
+          }
+        }
+        
+        if (!cc.empty())
+        {
+          preClustering.push_back(cc);
+        }
+      }
+    }
   }
   
   std::cerr << "Algorithm:  ";
