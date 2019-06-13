@@ -47,23 +47,36 @@ bool PreClusterKMeans::solve(int nrRestarts,
   
   for (int restart = 0; restart < nrRestarts; ++restart)
   {
-    std::vector<uint32_t> assignment = std::get<1>(dkm::kmeans_lloyd(data, _k, restart));
+    auto res = dkm::kmeans_lloyd(data, _k, restart);
     
-    IntVector z(_R.getNrCharacters());
-    for (int i = 0; i < _R.getNrCharacters(); ++i)
+    double logLikelihood = 0;
+    for (int i = 0; i < n; ++i)
     {
-      z[i] = assignment[i];
+      for (int p = 0; p < m; ++p)
+      {
+        int j =  std::get<1>(res)[i];
+        int var_pi = _R.getVar(p, i);
+        int ref_pi = _R.getRef(p, i);
+        double f_pi = std::get<0>(res)[j][p];
+        logLikelihood += getLogLikelihood(var_pi, ref_pi, f_pi);
+      }
     }
     
-    SoftPreClusterIlpCplex solver(_R, _k, log(_nrSegments) / log(2), _statType, _precisionBetaBin, false);
-    solver.init();
-    solver.initZ(z);
-    solver.solve(1, -1, verbose, -1);
     
-    if (_logLikelihood < solver.getLogLikelihood())
+    
+//    SoftPreClusterIlpCplex solver(_R, _k, log(_nrSegments) / log(2), _statType, _precisionBetaBin, true);
+//    solver.init();
+//    solver.initZ(z);
+//    solver.solve(1, -1, verbose, -1);
+//
+    if (_logLikelihood < logLikelihood)
     {
-      _logLikelihood = solver.getLogLikelihood();
-      _solZ = solver.getSolZ();
+      _logLikelihood = logLikelihood;
+      _solZ = IntVector(n, -1);
+      for (int i = 0; i < n; ++i)
+      {
+        _solZ[i] = std::get<1>(res)[i];
+      }
     }
   }
   
