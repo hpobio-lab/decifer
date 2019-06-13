@@ -26,12 +26,14 @@ public:
   /// @param statType Summary statistic to use for clustering
   /// @param precisionBetaBin Precision parameter for beta binomial
   /// @param forceTruncal Force the presence of a dominant truncal cluster
+  /// @param preClustering Pre clustering
   IncrementalSolver(const ReadMatrix& R,
                     int k,
                     int maxNrSegmentBits,
                     ClusterStatisticType statType,
                     double precisionBetaBin,
-                    bool forceTruncal);
+                    bool forceTruncal,
+                    const IntMatrix& preClustering);
   
   /// Destructor
   virtual ~IncrementalSolver()
@@ -100,6 +102,8 @@ protected:
 protected:
   /// Maximum number of segment bits
   const int _maxNrSegmentBits;
+  /// Preclustering
+  const IntMatrix& _preClustering;
   /// Solution state trees
   PosteriorStateTreeMatrix _solT;
   /// Solution y

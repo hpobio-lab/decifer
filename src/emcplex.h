@@ -50,7 +50,7 @@ protected:
                                                                     6,
                                                                     _statType,
                                                                     _precisionBetaBin,
-                                                                    _forceTruncal));
+                                                                    _forceTruncal, IntMatrix()));
   }
   
   

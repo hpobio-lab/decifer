@@ -351,9 +351,10 @@ Solution runIncrementalSolver(const ReadMatrix& R,
                               bool forceTruncal,
                               double betaBin,
                               int nrRestarts,
-                              int nrDownSampledSNVs)
+                              int nrDownSampledSNVs,
+                              const IntMatrix& preClustering)
 {
-  IncrementalSolver solver(R, k, nrSegments, statType, betaBin, forceTruncal);
+  IncrementalSolver solver(R, k, nrSegments, statType, betaBin, forceTruncal, preClustering);
   solver.init();
   
   double logLikelihood = -std::numeric_limits<double>::max();
@@ -526,7 +527,8 @@ Solution run(const ReadMatrix& R,
                                   forceTruncal,
                                   betaBin,
                                   nrRestarts,
-                                  downsampleSNVs);
+                                  downsampleSNVs,
+                                  preClustering);
     default:
       std::cerr << "Error: invalid method" << std::endl;
       return std::make_pair(-std::numeric_limits<double>::max(), BoolTensor());
@@ -688,6 +690,8 @@ int main(int argc, char** argv)
           preClustering.push_back(cc);
         }
       }
+      
+      std::cerr << "Input:      " << preClustering.size() << " preclusters" << std::endl;
     }
   }
   

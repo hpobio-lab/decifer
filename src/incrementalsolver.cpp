@@ -13,9 +13,11 @@ IncrementalSolver::IncrementalSolver(const ReadMatrix& R,
                                      int maxNrSegmentBits,
                                      ClusterStatisticType statType,
                                      double precisionBetaBin,
-                                     bool forceTruncal)
+                                     bool forceTruncal,
+                                     const IntMatrix& preClustering)
   : Solver(R, k, 0, statType, precisionBetaBin, forceTruncal)
   , _maxNrSegmentBits(maxNrSegmentBits)
+  , _preClustering(preClustering)
   , _solT()
   , _solY()
 {
@@ -50,6 +52,10 @@ bool IncrementalSolver::solve(int nrThreads,
     SoftClusterLpCplex solver(_R, _k, _maxNrSegmentBits, _statType, _precisionBetaBin, _forceTruncal, false);
     solver.init();
     solver.initConstraintsDCF(d, 1);
+    if (!_preClustering.empty())
+    {
+      solver.initPreClusteringConstraints(_preClustering);
+    }
     
     solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
     logLikelihood = solver.getLogLikelihood();
@@ -115,6 +121,10 @@ bool IncrementalSolver::solve(const ReadMatrix& R,
     SoftClusterLpCplex solver(R, _k, nrBits, _statType, _precisionBetaBin, _forceTruncal, includePi);
     solver.init();
     solver.initConstraintsDCF(_solD, 3);
+    if (!_preClustering.empty())
+    {
+      solver.initPreClusteringConstraints(_preClustering);
+    }
 //    solver.initConstraintsY(y);
     
     solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
