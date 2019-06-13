@@ -81,7 +81,7 @@ void PreCluster::run(const IntVector& snvIndices,
       }
       
 //      PreClusterIlpAlg solver(R, k, nrSegments, statType, precisionBetaBin, true);
-      PreClusterKMeans solver(R, k, statType, precisionBetaBin);
+      PreClusterKMeans solver(R, k, nrSegments, statType, precisionBetaBin);
       solver.init();
       solver.solve(10, verbose);
 //      solver.solve(nrThreads, timeLimit, verbose, memoryLimit);
