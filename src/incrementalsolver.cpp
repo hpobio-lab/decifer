@@ -114,7 +114,7 @@ bool IncrementalSolver::solve(const ReadMatrix& R,
     pi = solver.getPi();
   }
   
-//  std::cerr << "nrBits = " << 1 << " -- log likelihood = " << logLikelihood << std::endl << std::endl;
+  std::cerr << "nrBits = " << 1 << " -- log likelihood = " << logLikelihood << std::endl << std::endl;
   
   for (int nrBits = 2; nrBits <= _maxNrSegmentBits; ++nrBits)
   {
@@ -133,7 +133,7 @@ bool IncrementalSolver::solve(const ReadMatrix& R,
     d = solver.getD();
     pi = solver.getPi();
     
-//    std::cerr << "nrBits = " << nrBits << " -- log likelihood = " << logLikelihood << std::endl << std::endl;
+    std::cerr << "nrBits = " << nrBits << " -- log likelihood = " << logLikelihood << std::endl << std::endl;
   }
   
   return true;
