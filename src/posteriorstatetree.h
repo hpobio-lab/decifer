@@ -31,11 +31,45 @@ public:
     , _j(j)
   {
   }
+  
+  PosteriorStateTree(const PosteriorStateTree& other)
+    : _T(other._T)
+    , _gamma(other._gamma)
+    , _t(other._t)
+    , _j(other._j)
+  {
+  }
+  
+  PosteriorStateTree& operator =(const PosteriorStateTree& other)
+  {
+    if (this != &other)
+    {
+      _T = other._T;
+      _gamma = other._gamma;
+      _t = other._t;
+      _j = other._j;
+    }
+    return *this;
+  }
+  
+//  friend void swap(PosteriorStateTree& a, PosteriorStateTree& b)
+//  {
+//    using std::swap; // bring in swap for built-in types
+//
+//    StateTree cpy_Ta = a._T;
+//
+////    swap(a., b.base1);
+////    swap(a.base2, b.base2);
+////    // ...
+////    swap(a.member1, b.member1);
+////    swap(a.member2, b.member2);
+////    // ...
+//  }
 
-  const StateTree _T;
-  const double _gamma;
-  const int _t;
-  const int _j;
+  StateTree _T;
+  double _gamma;
+  int _t;
+  int _j;
   
   static void writeDOT(const PosteriorStateTreeVector& T,
                        std::ostream& out);

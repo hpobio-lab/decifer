@@ -486,6 +486,7 @@ bool EMCplexPre::stepM(int nrThreads,
 bool EMCplexPre::stepE(int nrThreads,
                        bool verbose)
 {
+  const int m = _R.getNrSamples();
   const int n = _R.getNrCharacters();
   const int nrPreClusters = _preClustering.size();
   
@@ -518,6 +519,7 @@ bool EMCplexPre::stepE(int nrThreads,
     _solPi[j] /= n;
   }
   
+  _solT = PosteriorStateTreeMatrix(n);
   for (int ii = 0; ii < nrPreClusters; ++ii)
   {
     const int scriptT_size = _scriptT[_preClustering[ii].front()].size();
@@ -532,9 +534,32 @@ bool EMCplexPre::stepE(int nrThreads,
         for (int i : _preClustering[ii])
         {
           _solY[i][t][j] = y_iitj;
+          
+          DoubleVector f_i;
+          for (int p = 0; p < m; ++p)
+          {
+            f_i.push_back((_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p]);
+          }
+          
+          _solT[i].emplace_back(convertToStateTreeFromSNVF(_R, _scriptT[i][t],
+                                                           f_i, i),
+                                y_iitj, t, j);
         }
       }
     }
+  }
+  
+  // sort and update _solZ
+  for (int i = 0; i < n; ++i)
+  {
+    std::sort(_solT[i].begin(),
+              _solT[i].end(),
+              [](const PosteriorStateTree& a,
+                 const PosteriorStateTree& b)
+                {
+                  return a._gamma > b._gamma;
+                });
+    _solZ[i] = _solT[i][0]._j;
   }
   
   _cplexE.end();

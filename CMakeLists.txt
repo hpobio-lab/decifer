@@ -217,6 +217,7 @@ if (CPLEX)
     src/softclusterilpcplexcallback.cpp
     src/softclusterilp.cpp
     src/softclusterilpcplex.cpp
+    src/softclusterlpcplexpre.cpp
     src/softclusterlpcplex.cpp
     src/softclusterlpcplexext.cpp
     src/statetree.cpp
@@ -225,7 +226,9 @@ if (CPLEX)
     src/basematrix.cpp
     src/utils.cpp
     src/em.cpp
+    src/empre.cpp
     src/emcplex.cpp
+    src/emcplexpre.cpp
     src/solver.cpp
     src/posteriorstatetree.cpp
     src/precluster.cpp
@@ -248,12 +251,15 @@ if (CPLEX)
     src/softclusterilp.h
     src/softclusterilpcplex.h
     src/softclusterlpcplex.h
+    src/softclusterlpcplexpre.h
     src/softclusterlpcplexext.h
     src/stategraph.h
     src/readmatrix.h
     src/basematrix.h
     src/em.h
+    src/empre.h
     src/emcplex.h
+    src/emcplexpre.h
     src/dkm/dkm.hpp
     src/dkm/dkm_utils.hpp
     src/solver.h
