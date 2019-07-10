@@ -227,6 +227,31 @@ void HardClusterIlpCplex::initConstraints()
     sum.clear();
   }
   
+  for (int i = 0; i < n; ++i)
+  {
+    const int size_T_i = _scriptT[i].size();
+    
+    for (int t = 0; t < size_T_i; ++t)
+    {
+      bool ok = true;
+      for (int p = 0; p < m; ++p)
+      {
+        if (_dUB[i][t][p] == 0 && _R.getVar(p, i) > 0)
+        {
+          ok = false;
+        }
+      }
+      
+      if (!ok)
+      {
+        for (int j = 0; j < _k; ++j)
+        {
+          _model.add(_y[i][t][j] == 0);
+        }
+      }
+    }
+  }
+  
   if (_includePi)
   {
     for (int j = 0; j < _k; ++j)
@@ -320,6 +345,13 @@ void HardClusterIlpCplex::initConstraints()
       }
     }
   }
+//  if (_includePi)
+//  {
+//    for (int j = 1; j < _k; ++j)
+//    {
+//      _model.add(_pi[j] <= _pi[j-1]);
+//    }
+//  }
    
   sum.end();
   sum2.end();

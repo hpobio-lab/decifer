@@ -12,16 +12,17 @@
 #include "precluster.h"
 
 #ifdef CPLEX
-  #include "emcplex.h"
+  #include "emcplexpre.h"
   #include "softclusterilpcplex.h"
   #include "softclusterlpcplex.h"
+  #include "softclusterlpcplexpre.h"
   #include "softclusterlpcplexext.h"
   #include "incrementalsolver.h"
-  typedef EMCplex EMAlg;
+  typedef EMCplexPre EMAlg;
   typedef ClusterIlpCplex ClusterIlpAlg;
   typedef HardClusterIlpCplex HardClusterIlpAlg;
   typedef SoftClusterIlpCplex SoftClusterIlpAlg;
-  typedef SoftClusterLpCplex SoftClusterLpAlg;
+  typedef SoftClusterLpCplexPre SoftClusterLpAlg;
 
   #include "minclusterilpcplex.h"
   typedef MinClusterIlpCplex MinClusterIlpAlg;
@@ -54,7 +55,8 @@ Solution runEM(const ReadMatrix& R,
                int localTimeLimit,
                int memoryLimit,
                bool forceTruncal,
-               double betaBin)
+               double betaBin,
+               const IntMatrix& preClustering)
 {
   int new_seed = seed;
   if (method == 1)
@@ -90,9 +92,9 @@ Solution runEM(const ReadMatrix& R,
         break;
       }
       
-      EMAlg em(R, k, nrSegments, statType, betaBin, forceTruncal);
+      EMAlg em(R, preClustering, k, nrSegments, statType, betaBin, forceTruncal);
       em.init();
-      em.initHotStart(initY);
+//      em.initHotStart(initY);
       g_rng.seed(seed + rr);
       if (em.solve(rr,
                    new_seed,
@@ -135,7 +137,7 @@ Solution runEM(const ReadMatrix& R,
           }
           outD.close();
           
-          initY = em.getInitY();
+//          initY = em.getInitY();
         }
         std::cerr << std::endl;
       }
@@ -231,7 +233,7 @@ Solution runSoftCluster(const ReadMatrix& R,
                         double betaBin,
                         const IntMatrix& preClustering)
 {
-  SoftClusterLpAlg solver(R, k, log(nrSegments)/log(2), statType, betaBin, forceTruncal, false);
+  SoftClusterLpAlg solver(R, preClustering, k, log(nrSegments)/log(2), statType, betaBin, forceTruncal, false);
   solver.init();
   solver.initHotStart(prevSolution);
   if (!preClustering.empty())
@@ -481,7 +483,8 @@ Solution run(const ReadMatrix& R,
                    globalTimeLimit,
                    memoryLimit,
                    forceTruncal,
-                   betaBin);
+                   betaBin,
+                   preClustering);
     case 3:
       return runCluster(R, statType, k, alpha,
                         nrThreads, timeLimit,
@@ -512,7 +515,8 @@ Solution run(const ReadMatrix& R,
                    globalTimeLimit,
                    memoryLimit,
                    forceTruncal,
-                   betaBin);
+                   betaBin,
+                   preClustering);
     case 6:
       return runSoftCluster(R, statType, k,
                             nrSegments, nrThreads,
@@ -553,7 +557,7 @@ int main(int argc, char** argv)
   int maxIterations = 50;
   int nrThreads = -1;
   int timeLimit = -1;
-  int method = 2;
+  int method = 6;
   double alpha = 0.25;
   bool bic = false;
   bool verbose = false;
@@ -563,7 +567,7 @@ int main(int argc, char** argv)
   std::string stateTreeFilename;
   double precisionBetaBin = -1;
   bool forceTruncal;
-  std::string preClusteringFilename = "-";
+  std::string preClusteringFilename;
 
   lemon::ArgParser ap(argc, argv);
   ap.refOption("s", "Random number generator seed (default: 0)", seed)
@@ -582,19 +586,21 @@ int main(int argc, char** argv)
                     "     2 -- Expectation-Maximization using hard clustering with probabilistic likelihood function (default)\n" \
                     "     3 -- Hard clustering with confidence intervals\n" \
                     "     4 -- Hard clustering with probabilistic likelihood function\n" \
-                    "     5 -- Expectation-Maximization using hard clustering with distance-based likelihood function", method, false)
+                    "     5 -- Expectation-Maximization using hard clustering with distance-based likelihood function\n" \
+                    "     6 -- Exact Expectation-Maximization algorithm (default)\n" \
+                    "     7 -- Incremental solver", method, false)
     .refOption("k", "Number of clusters", k, true)
     .refOption("i", "Maximum number of iterations during EM (default: 32)", maxIterations)
     .refOption("t", "Number of threads (default: -1, limited by CPU)", nrThreads)
     .refOption("tl", "Time limit in seconds (default: -1, unlimited)", timeLimit)
     .refOption("TL", "Global time limit in seconds (default: -1, unlimited)", globalTimeLimit)
-    .refOption("N", "Number of segments (default: 50)", nrSegments, false)
+    .refOption("N", "Number of segments (default: 32)", nrSegments, false)
     .refOption("r", "Number of restarts (default: 10)", nrRestarts, false)
     .refOption("o", "Output prefix (default: './output')", outputPrefix)
     .refOption("v", "Verbose (default: 0)", verbose, false)
     .refOption("ML", "Memory limit", memoryLimit)
     .refOption("S", "State tree file", stateTreeFilename, false)
-    .refOption("P", "Pre clustering filename (default: no preclustering)", preClusteringFilename)
+    .refOption("P", "Pre clustering filename (specify '-' to disable)", preClusteringFilename)
     .other("filename");
   ap.parse();
   
@@ -663,6 +669,12 @@ int main(int argc, char** argv)
     pc.run(nrSegments, statType, precisionBetaBin, nrThreads, timeLimit, verbose, memoryLimit);
     
     preClustering = pc.getPreClustering();
+    
+//    preClustering = IntMatrix(R.getNrCharacters());
+//    for (int i = 0; i < R.getNrCharacters(); ++i)
+//    {
+//      preClustering[i].push_back(i);
+//    }
   }
   else if (preClusteringFilename != "-")
   {

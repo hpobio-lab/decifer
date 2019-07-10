@@ -54,7 +54,7 @@ void Solver::initPWLA()
   
   // compute coord
   DoubleVector coord(_nrSegments);
-  coord[0] = 0;
+  coord[0] = g_tol.epsilon();
   coord[_nrSegments - 1] = 1;
   
   const double delta = 1. / (_nrSegments - 1);
@@ -64,6 +64,7 @@ void Solver::initPWLA()
   }
   
   // initialize segments
+  const double infeasible_log = -1e300;
   _hatG = Double5Matrix(n);
   for (int i = 0; i < n; ++i)
   {
@@ -85,20 +86,30 @@ void Solver::initPWLA()
           for (int alpha = 0; alpha < _nrSegments; ++alpha)
           {
             double h = (coord[alpha] - _numerator[i][t][p]) / _denominator[i][p];
-            if (h <= 0 || !g_tol.nonZero(h))
+            if (!g_tol.nonZero(h))
             {
-              _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+              h = 0;
             }
-            else if (h >= 1 || g_tol.less(1, h))
+            else if (!g_tol.different(h, 1))
             {
-              _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+              h = 1;
             }
-            else
+//            if (var_ip > 0 && (h <= 0 || !g_tol.nonZero(h)))
+//            {
+//              _hatG[i][t][j][p][alpha] = infeasible_log;//log(g_tol.epsilon());
+//            }
+//            else if (ref_ip > 0 && (h >= 1 || g_tol.less(1, h)))
+//            {
+//              _hatG[i][t][j][p][alpha] = infeasible_log;//log(g_tol.epsilon());
+//            }
+//            else
             {
               double likelihood = getLogLikelihood(var_ip, ref_ip, h);
-              if (likelihood < log(g_tol.epsilon()))
+//              assert(!isinf(likelihood));
+//              assert(!isnan(likelihood));
+              if (likelihood < infeasible_log || isnan(likelihood) || isinf(likelihood))
               {
-                _hatG[i][t][j][p][alpha] = log(g_tol.epsilon());
+                _hatG[i][t][j][p][alpha] = infeasible_log;//log(g_tol.epsilon());
               }
               else
               {
@@ -476,6 +487,9 @@ double Solver::getLogLikelihood(int i) const
     for (int j = 0; j < _k; ++j)
     {
       if (_solPi[j] == 0)
+        continue;
+      
+      if (!isEnabled(i, t, j))
         continue;
       
       double prod = _solPi[j] / size_scriptT_i;

@@ -1,22 +1,25 @@
 /*
- * softclusterlpcplex.cpp
+ * softclusterlpcplexpre.cpp
  *
  *  Created on: 17-apr-2019
  *      Author: M. El-Kebir
  */
 
-#include "softclusterlpcplex.h"
+#include "softclusterlpcplexpre.h"
 #include "ilconcert/ilolinear.h"
 #include "softclusterlpcplexcallback.h"
 
-SoftClusterLpCplex::SoftClusterLpCplex(const ReadMatrix& R,
-                                       int k,
-                                       int nrSegmentBits,
-                                       ClusterStatisticType statType,
-                                       double precisionBetaBin,
-                                       bool forceTruncal,
-                                       bool pi)
+SoftClusterLpCplexPre::SoftClusterLpCplexPre(const ReadMatrix& R,
+                                             const IntMatrix& preClustering,
+                                             int k,
+                                             int nrSegmentBits,
+                                             ClusterStatisticType statType,
+                                             double precisionBetaBin,
+                                             bool forceTruncal,
+                                             bool pi)
   : SoftClusterIlp(R, k, (1 << nrSegmentBits) + 1, statType, precisionBetaBin, forceTruncal)
+  , _preClustering(preClustering)
+  , _charToPreCluster(R.getNrCharacters(), -1)
   , _nrSegmentBits(nrSegmentBits)
   , _env()
   , _model(_env)
@@ -30,71 +33,43 @@ SoftClusterLpCplex::SoftClusterLpCplex(const ReadMatrix& R,
   , _llambda()
   , _includePi(pi)
 {
-}
-
-void SoftClusterLpCplex::initPreClusteringConstraint(int i1, int i2)
-{
-  assert(_scriptT[i1].size() == _scriptT[i2].size());
-  
-  const int m = _R.getNrSamples();
-  
-  const int scriptT_size = _scriptT[i1].size();
-  for (int t = 0; t < scriptT_size; ++t)
+  // set character to pre clusters map
+  const int nrPreClusters = _preClustering.size();
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    for (int j = 0; j < _k; ++j)
+    for (int i : _preClustering[ii])
     {
-      _model.add(_y[i1][t][j] == _y[i2][t][j]);
-      for (int p = 0; p < m; ++p)
-      {
-        for (int alpha = 0; alpha < _nrSegments; ++alpha)
-        {
-          _model.add(_lambda[i1][t][j][p][alpha] == _lambda[i2][t][j][p][alpha]);
-        }
-      }
+      _charToPreCluster[i] = ii;
     }
   }
 }
 
-void SoftClusterLpCplex::initHotStart(const BoolTensor& y)
+void SoftClusterLpCplexPre::initHotStart(const BoolTensor& y)
 {
 }
 
-void SoftClusterLpCplex::initVariables()
+void SoftClusterLpCplexPre::initVariables()
 {
-//  for (unsigned int i = 0; i < _nrSegments - 1; ++i)
-//  {
-//    std::cout << i << ":";
-//    unsigned int gray = binaryToGray(i);
-//
-//    for (int bit = 0; bit < 32; ++bit)
-//    {
-//      std::cout << " ";
-//      if (gray & (1 << bit))
-//        std::cout << 1;
-//      else
-//        std::cout << 0;
-//    }
-//    std::cout << std::endl;
-//  }
-  
+  const int nrPreClusters = _preClustering.size();
   const int n = _R.getNrCharacters();
   const int m = _R.getNrSamples();
   
   char buf[1024];
   
-  _y = IloNumVar3Matrix(_env, n);
-  for (int i = 0; i < n; ++i)
+  _y = IloNumVar3Matrix(_env, nrPreClusters);
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    const int size_T_i = _scriptT[i].size();
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
     
-    _y[i] = IloNumVarMatrix(_env, size_T_i);
-    for (int t = 0; t < size_T_i; ++t)
+    _y[ii] = IloNumVarMatrix(_env, size_T_ii);
+    for (int t = 0; t < size_T_ii; ++t)
     {
-      _y[i][t] = IloNumVarArray(_env, _k);
+      _y[ii][t] = IloNumVarArray(_env, _k);
       for (int j = 0; j < _k; ++j)
       {
-        snprintf(buf, 1024, "y;%d;%d;%d", i, t, j);
-        _y[i][t][j] = IloNumVar(_env, 0, 1, buf);
+        snprintf(buf, 1024, "y;%d;%d;%d", ii, t, j);
+        _y[ii][t][j] = IloNumVar(_env, 0, 1, buf);
       }
     }
   }
@@ -150,23 +125,26 @@ void SoftClusterLpCplex::initVariables()
     }
   }
 
-  _lambda = IloNumVar5Matrix(_env, n);
-  for (int i = 0; i < n; ++i)
+  _lambda = IloNumVar5Matrix(_env, nrPreClusters);
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    _lambda[i] = IloNumVar4Matrix(_env, _scriptT[i].size());
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    
+    _lambda[ii] = IloNumVar4Matrix(_env, size_T_ii);
+    for (int t = 0; t < size_T_ii; ++t)
     {
-      _lambda[i][t] = IloNumVar3Matrix(_env, _k);
+      _lambda[ii][t] = IloNumVar3Matrix(_env, _k);
       for (int j = 0; j < _k; ++j)
       {
-        _lambda[i][t][j] = IloNumVarMatrix(_env, m);
+        _lambda[ii][t][j] = IloNumVarMatrix(_env, m);
         for (int p = 0; p < m; ++p)
         {
-          _lambda[i][t][j][p] = IloNumVarArray(_env, _nrSegments);
+          _lambda[ii][t][j][p] = IloNumVarArray(_env, _nrSegments);
           for (int alpha = 0; alpha < _nrSegments; ++alpha)
           {
-            snprintf(buf, 1024, "lambda;%d;%d;%d;%d;%d", i, t, j, p, alpha);
-            _lambda[i][t][j][p][alpha] = IloNumVar(_env, 0, 1, buf);
+            snprintf(buf, 1024, "lambda;%d;%d;%d;%d;%d", ii, t, j, p, alpha);
+            _lambda[ii][t][j][p][alpha] = IloNumVar(_env, 0, 1, buf);
           }
         }
       }
@@ -204,78 +182,30 @@ void SoftClusterLpCplex::initVariables()
   }
 }
 
-void SoftClusterLpCplex::initConstraints()
+void SoftClusterLpCplexPre::initConstraints()
 {
+  const int nrPreClusters = _preClustering.size();
   const int n = _R.getNrCharacters();
   const int m = _R.getNrSamples();
   
   IloExpr sum(_env), sum2(_env), sum3(_env), sum4(_env), sum5(_env);
   
   // one state tree and cluster per SNV
-  for (int i = 0; i < n; ++i)
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    const int size_T_i = _scriptT[i].size();
-    for (int t = 0; t < size_T_i; ++t)
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    
+    for (int t = 0; t < size_T_ii; ++t)
     {
       for (int j = 0; j < _k; ++j)
       {
-        sum += _y[i][t][j];
+        sum += _y[ii][t][j];
       }
     }
     
     _model.add(sum == 1);
     sum.clear();
-  }
-  
-  BoolVector treeWithNonZeroDCF(n, false);
-  for (int i = 0; i < n; ++i)
-  {
-    const int size_T_i = _scriptT[i].size();
-    
-    for (int t = 0; t < size_T_i; ++t)
-    {
-      bool ok = true;
-      for (int p = 0; p < m; ++p)
-      {
-        ok &= _dUB[i][t][p] > 0;
-      }
-      
-      if (ok)
-      {
-        treeWithNonZeroDCF[i] = true;
-        break;
-      }
-    }
-  }
-
-  for (int i = 0; i < n; ++i)
-  {
-    const int size_T_i = _scriptT[i].size();
-  
-    for (int t = 0; t < size_T_i; ++t)
-    {
-      bool ok = true;
-      for (int p = 0; p < m; ++p)
-      {
-        if (_dUB[i][t][p] == 0 && _R.getVar(p, i) > 0)
-        {
-          ok = false;
-        }
-        if (_dUB[i][t][p] == 0)
-        {
-          ok = false;
-        }
-      }
-      
-      if (!ok && treeWithNonZeroDCF[i])
-      {
-        for (int j = 0; j < _k; ++j)
-        {
-//          std::cerr << _y[i][t][j] << std::endl;
-          _model.add(_y[i][t][j] == 0);
-        }
-      }
-    }
   }
   
 //  for (int i = 0; i < n; ++i)
@@ -322,10 +252,11 @@ void SoftClusterLpCplex::initConstraints()
     {
       for (int i = 0; i < n; ++i)
       {
+        const int ii = _charToPreCluster[i];
         const int size_T_i = _scriptT[i].size();
         for (int t = 0; t < size_T_i; ++t)
         {
-          sum += _y[i][t][j];
+          sum += _y[ii][t][j];
         }
       }
       _model.add(_pi[j] == sum);
@@ -477,9 +408,12 @@ void SoftClusterLpCplex::initConstraints()
     }
   }
   
-  for (int i = 0; i < n; ++i)
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    
+    for (int t = 0; t < size_T_ii; ++t)
     {
       for (int j = 0; j < _k; ++j)
       {
@@ -487,10 +421,10 @@ void SoftClusterLpCplex::initConstraints()
         {
           for (int alpha = 0; alpha < _nrSegments; ++alpha)
           {
-            sum += _lambda[i][t][j][p][alpha];
-            _model.add(_llambda[j][p][alpha] >= _lambda[i][t][j][p][alpha]);
+            sum += _lambda[ii][t][j][p][alpha];
+            _model.add(_llambda[j][p][alpha] >= _lambda[ii][t][j][p][alpha]);
           }
-          _model.add(sum == _y[i][t][j]);
+          _model.add(sum == _y[ii][t][j]);
           sum.clear();
         }
       }
@@ -511,9 +445,113 @@ void SoftClusterLpCplex::initConstraints()
     }
   }
   
-  for (int i = 0; i < n; ++i)
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    
+    IntSet dominatingStateTrees;
+    
+    for (int i : _preClustering[ii])
+    {
+      Digraph G;
+      IntNodeMap node2idx(G);
+      DoubleVectorNodeMap node2dcfExp(G);
+      for (int t = 0; t < size_T_ii; ++t)
+      {
+        Node v = G.addNode();
+        node2idx[v] = t;
+        node2dcfExp[v] = DoubleVector(m, 0);
+        
+        // compute dcfExp
+        
+        DoubleVector f_i;
+        for (int p = 0; p < m; ++p)
+        {
+          f_i.push_back(_R.getVAF(p, i));
+        }
+        
+        StateTree TT = Solver::convertToStateTreeFromSNVF(_R, _scriptT[i][t], f_i, i);
+        for (int p = 0; p < m; ++p)
+        {
+          node2dcfExp[v][p] = TT.dcf(p);
+        }
+      }
+      
+      for (NodeIt v(G); v != lemon::INVALID; ++v)
+      {
+        bool dominating = true;
+        for (NodeIt w(G); w != lemon::INVALID; ++w)
+        {
+          if (v == w)
+            continue;
+          
+          bool edge = true;
+          for (int p = 0; p < m; ++p)
+          {
+            edge &= g_tol.less(node2dcfExp[v][p], node2dcfExp[w][p]);
+          }
+          
+          if (edge)
+          {
+            G.addArc(v, w);
+            dominating = false;
+          }
+        }
+        
+        if (dominating)
+        {
+          dominatingStateTrees.insert(node2idx[v]);
+        }
+      }
+    }
+    
+//    std::cerr << "SNV precluster: " << ii << " -- number of state trees: "
+//              << dominatingStateTrees.size() << "/" << size_T_ii << std::endl;
+    if (!dominatingStateTrees.empty())
+    {
+      for (int t = 0; t < size_T_ii; ++t)
+      {
+        if (dominatingStateTrees.count(t) == 0)
+        {
+          for (int j = 0; j < _k; ++j)
+          {
+            _model.add(_y[ii][t][j] == 0);
+          }
+        }
+      }
+    }
+  }
+  
+  DoubleTensor dPreLB(nrPreClusters);
+  DoubleTensor dPreUB(nrPreClusters);
+  for (int ii = 0; ii < nrPreClusters; ++ii)
+  {
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    
+    dPreLB[ii] = DoubleMatrix(size_T_ii, DoubleVector(m, 0));
+    dPreUB[ii] = DoubleMatrix(size_T_ii, DoubleVector(m, 1));
+    
+    for (int t = 0; t < size_T_ii; ++t)
+    {
+      for (int p = 0; p < m; ++p)
+      {
+        for (int i : _preClustering[ii])
+        {
+          dPreLB[ii][t][p] = std::max(dPreLB[ii][t][p], _dLB[i][t][p]);
+          dPreUB[ii][t][p] = std::min(dPreUB[ii][t][p], _dUB[i][t][p]);
+        }
+      }
+    }
+  }
+  
+  for (int ii = 0; ii < nrPreClusters; ++ii)
+  {
+    assert(!_preClustering[ii].empty());
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    
+    for (int t = 0; t < size_T_ii; ++t)
     {
       for (int j = 0; j < _k; ++j)
       {
@@ -521,19 +559,27 @@ void SoftClusterLpCplex::initConstraints()
         {
           for (int alpha = 0; alpha < _nrSegments-1; ++alpha)
           {
-            if (g_tol.less(_coord[alpha], _dLB[i][t][p]) && g_tol.less(_coord[alpha + 1], _dLB[i][t][p]))
-//            if (_coord[alpha] < _dLB[i][t][p] && _coord[alpha + 1] < _dLB[i][t][p])
+            for (int i : _preClustering[ii])
             {
-              _model.add(_lambda[i][t][j][p][alpha] == 0);
+              if (g_tol.less(_coord[alpha], _dLB[i][t][p]) && g_tol.less(_coord[alpha + 1], _dLB[i][t][p]))
+  //            if (_coord[alpha] < _dLB[i][t][p] && _coord[alpha + 1] < _dLB[i][t][p])
+              {
+                _model.add(_lambda[ii][t][j][p][alpha] == 0);
+                break;
+              }
             }
           }
           
           for (int alpha = 1; alpha < _nrSegments; ++alpha)
           {
-            if (g_tol.less(_dUB[i][t][p], _coord[alpha-1]) && g_tol.less(_dUB[i][t][p], _coord[alpha]))
-//            if (_coord[alpha-1] > _dUB[i][t][p] && _coord[alpha] > _dUB[i][t][p])
+            for (int i : _preClustering[ii])
             {
-              _model.add(_lambda[i][t][j][p][alpha] == 0);
+              if (g_tol.less(_dUB[i][t][p], _coord[alpha-1]) && g_tol.less(_dUB[i][t][p], _coord[alpha]))
+  //            if (_coord[alpha-1] > _dUB[i][t][p] && _coord[alpha] > _dUB[i][t][p])
+              {
+                _model.add(_lambda[ii][t][j][p][alpha] == 0);
+                break;
+              }
             }
           }
         }
@@ -561,35 +607,6 @@ void SoftClusterLpCplex::initConstraints()
       }
     }
   }
-//  else
-//  if (_includePi)
-//  {
-//    for (int j = 1; j < _k; ++j)
-//    {
-//      _model.add(_pi[j] <= _pi[j-1]);
-//    }
-//  }
-  
-  /*
-   3 #clusters
-   2 #samples
-   0.140431 0.373801
-   0.524305 0.811727
-   0.865575 0.96332
-   0.46
-   0.22
-   0.32
-  */
-//  _model.add(_d[0][0] == 0.140431);
-//  _model.add(_d[0][1] == 0.373801);
-//  _model.add(_d[1][0] == 0.524305);
-//  _model.add(_d[1][1] == 0.811727);
-//  _model.add(_d[2][0] == 0.865575);
-//  _model.add(_d[2][1] == 0.96332);
-//
-//  _model.add(_pi[0] == 0.46);
-//  _model.add(_pi[1] == 0.22);
-//  _model.add(_pi[2] == 0.32);
   
   sum.end();
   sum2.end();
@@ -597,7 +614,7 @@ void SoftClusterLpCplex::initConstraints()
   sum4.end();
 }
 
-void SoftClusterLpCplex::initObjective()
+void SoftClusterLpCplexPre::initObjective()
 {
   const int n = _R.getNrCharacters();
   const int m = _R.getNrSamples();
@@ -616,80 +633,64 @@ void SoftClusterLpCplex::initObjective()
     }
   }
   
-  for (int i = 0; i < n; ++i)
+  const int nrPreClusters = _preClustering.size();
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    for (int i : _preClustering[ii])
     {
-      for (int j = 0; j < _k; ++j)
+      for (int t = 0; t < _scriptT[i].size(); ++t)
       {
-        for (int p = 0; p < m; ++p)
+        for (int j = 0; j < _k; ++j)
         {
-          for (int alpha = 0; alpha < _nrSegments; ++alpha)
+          for (int p = 0; p < m; ++p)
           {
-            sum += _hatG[i][t][j][p][alpha] * _lambda[i][t][j][p][alpha];
+            for (int alpha = 0; alpha < _nrSegments; ++alpha)
+            {
+              sum += _hatG[i][t][j][p][alpha] * _lambda[ii][t][j][p][alpha];
+            }
           }
-        }
-        
-        if (_includePi)
-        {
-          sum -= log(_scriptT[i].size()) * _y[i][t][j];
+          
+          if (_includePi)
+          {
+            sum -= log(_scriptT[i].size()) * _y[ii][t][j];
+          }
         }
       }
     }
   }
+  
+//  for (int i = 0; i < n; ++i)
+//  {
+//    const int ii = _charToPreCluster[i];
+//    for (int t = 0; t < _scriptT[i].size(); ++t)
+//    {
+//      for (int j = 0; j < _k; ++j)
+//      {
+//        for (int p = 0; p < m; ++p)
+//        {
+//          for (int alpha = 0; alpha < _nrSegments; ++alpha)
+//          {
+//            sum += _hatG[i][t][j][p][alpha] * _lambda[ii][t][j][p][alpha];
+//          }
+//        }
+//
+//        if (_includePi)
+//        {
+//          sum -= log(_scriptT[i].size()) * _y[ii][t][j];
+//        }
+//      }
+//    }
+//  }
   
   _model.add(IloMaximize(_env, sum));
   sum.clear();
   sum.end();
 }
 
-void SoftClusterLpCplex::initConstraintsY(const DoubleTensor& y)
-{
-  const int n = _R.getNrCharacters();
-  
-  for (int i = 0; i < n; ++i)
-  {
-    for (int t = 0; t < _scriptT[i].size(); ++t)
-    {
-      for (int j = 0; j < _k; ++j)
-      {
-        if (!g_tol.nonZero(y[i][t][j]))
-        {
-          _model.add(_y[i][t][j] == 0);
-        }
-      }
-    }
-  }
-}
-
-void SoftClusterLpCplex::initConstraintsDCF(const DoubleMatrix& d,
-                                            int multiplicity)
-{
-  const int m = _R.getNrSamples();
-  
-  const double delta = _coord[1] - _coord[0];
-  
-  assert(d.size() == _k);
-  assert(d[0].size() == m);
-  for (int j = 0; j < _k; ++j)
-  {
-    for (int p = 0; p < m; ++p)
-    {
-      for (int alpha = 0; alpha < _nrSegments; ++alpha)
-      {
-        if (g_tol.less(multiplicity * delta, fabs(_coord[alpha] - d[j][p])))
-        {
-          _model.add(_llambda[j][p][alpha] == 0);
-        }
-      }
-    }
-  }
-}
-
-bool SoftClusterLpCplex::solve(int nrThreads,
-                               int timeLimit,
-                               bool verbose,
-                               int memoryLimit)
+bool SoftClusterLpCplexPre::solve(int nrThreads,
+                                  int timeLimit,
+                                  bool verbose,
+                                  int memoryLimit)
 {
   const int n = _R.getNrCharacters();
   const int m = _R.getNrSamples();
@@ -706,12 +707,6 @@ bool SoftClusterLpCplex::solve(int nrThreads,
   {
     _cplex.setParam(IloCplex::WorkMem, memoryLimit);
   }
-  
-//  _cplex.setParam(IloCplex::PreInd, 0);
-  
-//  IloFastMutex mutex;
-//  _cplex.use(IloCplex::Callback(new (_env) SoftClusterLpCplexCallback<IloCplex::LazyConstraintCallbackI>(_env, m, n, _k, _y, _lambda, _llambda, _dLB, _dUB, &mutex)));
-//  _cplex.use(IloCplex::Callback(new (_env) SoftClusterLpCplexCallback<IloCplex::UserCutCallbackI>(_env, m, n, _k, _y, _lambda, _llambda, _dLB, _dUB, &mutex)));
   
   if (!verbose)
   {
@@ -739,11 +734,6 @@ bool SoftClusterLpCplex::solve(int nrThreads,
     return false;
   }
   
-//  std::cerr << "Log likelihood: " << _cplex.getBestObjValue() << std::endl;
-  
-//  std::cout << "Obj value: " << _cplex.getObjValue() << std::endl;
-//  std::cout << "Best obj value: " << _cplex.getBestObjValue() << std::endl;
-  
   _solD = DoubleMatrix(_k, DoubleVector(m, 0));
   _solPi = DoubleVector(_k);
   
@@ -761,19 +751,31 @@ bool SoftClusterLpCplex::solve(int nrThreads,
   }
 
   // get y
+  const int nrPreClusters = _preClustering.size();
+  
   _solY = DoubleTensor(n);
-  for (int i = 0; i < n; ++i)
+  for (int ii = 0; ii < nrPreClusters; ++ii)
   {
-    _solY[i] = DoubleMatrix(_scriptT[i].size());
-    for (int t = 0; t < _scriptT[i].size(); ++t)
+    // init solY
+    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+    for (int i : _preClustering[ii])
     {
-      _solY[i][t] = DoubleVector(_k);
+      _solY[i] = DoubleMatrix(size_T_ii, DoubleVector(_k, 0));
+    }
+    
+    for (int t = 0; t < size_T_ii; ++t)
+    {
       for (int j = 0; j < _k; ++j)
       {
-        _solY[i][t][j] = _cplex.getValue(_y[i][t][j]);
-        if (!g_tol.nonZero(_solY[i][t][j]))
+        double y_iitj = _cplex.getValue(_y[ii][t][j]);
+        if (!g_tol.nonZero(y_iitj))
         {
-          _solY[i][t][j] = 0;
+          y_iitj = 0;
+        }
+          
+        for (int i : _preClustering[ii])
+        {
+          _solY[i][t][j] = y_iitj;
         }
       }
     }
@@ -822,67 +824,16 @@ bool SoftClusterLpCplex::solve(int nrThreads,
     }
   }
   
-  // get d
-//  std::cerr << "d:" << std::endl;
-//  for (int j = 0; j < _k; ++j)
-//  {
-//    for (int p = 0; p < m; ++p)
-//    {
-//      std::cerr << _solD[j][p] << " ";
-//    }
-//    std::cerr << std::endl;
-//  }
-//  std::cerr << std::endl;
-//  
-//  std::cerr << "pi:" << std::endl;
-//  for (int j = 0; j < _k; ++j)
-//  {
-//    std::cerr << _solPi[j] << " ";
-//  }
-//  std::cerr << std::endl;
-  
-//  std::cout << "bpD :" << std::endl;
-//  for (int j = 0; j < _k; ++j)
-//  {
-//    for (int p = 0; p < m; ++p)
-//    {
-//      for (int alpha = 0; alpha < _nrSegments; ++alpha)
-//      {
-//        if (g_tol.nonZero(_cplex.getValue(_llambda[j][p][alpha])))
-//        {
-//          std::cout << _llambda[j][p][alpha] << " == " << _cplex.getValue(_llambda[j][p][alpha]) << std::endl;
-//        }
-//      }
-//    }
-//  }
-//  std::cout << std::endl;
-
   _solT = PosteriorStateTreeMatrix(n);
   _solZ.clear();
-  _solY = DoubleTensor(n);
   for (int i = 0; i < n; ++i)
   {
-    _solY[i] = DoubleMatrix(_scriptT[i].size());
     for (int t = 0; t < _scriptT[i].size(); ++t)
     {
-      _solY[i][t] = DoubleVector(_k);
       for (int j = 0; j < _k; ++j)
       {
-        _solY[i][t][j] = _cplex.getValue(_y[i][t][j]);
         if (g_tol.nonZero(_solY[i][t][j]))
         {
-//          double sum = 0;
-//          for (int p = 0; p < m; ++p)
-//          {
-//            for (int alpha = 0; alpha < _nrSegments; ++alpha)
-//            {
-//              if (g_tol.nonZero(_cplex.getValue(_lambda[i][t][j][p][alpha])))
-//              {
-//                sum += _hatG[i][t][j][p][alpha] * _cplex.getValue(_lambda[i][t][j][p][alpha]);
-//              }
-//            }
-//          }
-          
           DoubleVector h_i;
           for (int p = 0; p < m; ++p)
           {
@@ -893,12 +844,6 @@ bool SoftClusterLpCplex::solve(int nrThreads,
                                                            h_i, i),
                                 _solY[i][t][j], t, j);
           
-//          std::cout << " = " << sum << std::endl;
-//          for (int p = 0; p < m; ++p)
-//          {
-//            std::cout << "[" << _dLB[i][t][p] << "," << _dUB[i][t][p] << "] ";
-//          }
-//          std::cout << std::endl;
         }
       }
     }

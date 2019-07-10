@@ -77,6 +77,27 @@ bool PreClusterKMeans::solve(int nrRestarts,
       {
         _solZ[i] = std::get<1>(res)[i];
       }
+      
+      // set solD
+      _solD = DoubleMatrix(_k, DoubleVector(m, 0));
+      for (int j = 0; j < _k; ++j)
+      {
+        for (int p = 0; p < m; ++p)
+        {
+          _solD[j][p] = std::get<0>(res)[j][p];
+        }
+      }
+      
+      // set solPi
+      _solPi = DoubleVector(_k, 0);
+      for (int i = 0; i < n; ++i)
+      {
+        ++_solPi[_solZ[i]];
+      }
+      for (int j = 0; j < _k; ++j)
+      {
+        _solPi[j] /= n;
+      }
     }
   }
   

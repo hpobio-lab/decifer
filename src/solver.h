@@ -227,7 +227,7 @@ protected:
   /// @param j Cluster
   virtual bool isEnabled(int i, int t, int j) const
   {
-    return false;
+    return true;
   }
   
   /// Initialize piecewise linear approximation

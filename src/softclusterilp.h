@@ -91,7 +91,9 @@ protected:
   virtual void initPWLA();
   
   /// Initialize pre clustering constraint
-  virtual void initPreClusteringConstraint(int i1, int i2) = 0;
+  virtual void initPreClusteringConstraint(int i1, int i2)
+  {
+  };
   
   /// Initialize variables
   virtual void initVariables() = 0;
