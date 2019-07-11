@@ -70,15 +70,6 @@ void PreCluster::run(const IntVector& snvIndices,
     for (int k = 1; k <= max_k; ++k)
     {
       int nrParameters = R.getNrSamples() * (k+1);
-//      {
-//        Solver solver(R, k, 0, statType, precisionBetaBin, false);
-//        solver.init();
-//
-//        for (int i = 0; i < R.getNrCharacters(); ++i)
-//        {
-//          nrParameters += k * solver.getScriptT(i).size() * k;
-//        }
-//      }
       
 //      PreClusterIlpAlg solver(R, k, nrSegments, statType, precisionBetaBin, true);
       PreClusterKMeans solver(R, k, nrSegments, statType, precisionBetaBin);

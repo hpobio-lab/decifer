@@ -1,0 +1,19 @@
+
+Log started (V12.8.0.0) Wed Jul 10 11:37:48 2019
+
+No problem exists.
+No problem exists.
+
+Problem '/tmp/infeasible.lp' read.
+Read time = 0.03 sec. (0.63 ticks)
+Parallel mode: deterministic, using up to 4 threads for concurrent optimization.
+Infeasibility row 'c512':  0  = 1.
+Presolve time = 0.01 sec. (1.43 ticks)
+Presolve - Infeasible.
+Solution time =    0.03 sec.
+Deterministic time = 1.44 ticks  (51.33 ticks/sec)
+Infeasibility row 'c512':  0  = 1.
+Presolve time = 0.00 sec. (1.43 ticks)
+Presolve - Infeasible.
+Solution time =    0.00 sec.
+Deterministic time = 1.43 ticks  (456.10 ticks/sec)

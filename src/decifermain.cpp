@@ -426,11 +426,11 @@ int getNrParameters(const ReadMatrix& R,
     case 0:
     case 1:
     case 2:
+    case 5:
     case 6:
       break;
     case 3:
     case 4:
-    case 5:
       {
         Solver solver(R, k, 0, statType, betaBin, false);
         solver.init();
