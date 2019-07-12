@@ -154,7 +154,7 @@ void PosteriorStateTree::writeSummary(const ReadMatrix& R,
       double sangerCCF = sanger.second;
       
       double max_gamma = -1;
-      double max_t = -1;
+      int max_t = -1;
       for (int t = 0; t < sol[i].size(); ++t)
       {
         if (sol[i][t]._gamma > max_gamma)
