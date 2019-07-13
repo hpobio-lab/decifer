@@ -117,6 +117,7 @@ bool EMPre::initializeD(int seed,
   
   IntMatrix newPreClustering;
   std::map<int, int> old2new;
+  std::map<int, int> old2newSNV;
   int idx = 0;
   for (int i : snvIndices)
   {
@@ -130,6 +131,7 @@ bool EMPre::initializeD(int seed,
     {
       newPreClustering[old2new[ii]].push_back(idx);
     }
+    old2newSNV[i] = idx;
     ++idx;
   }
   
@@ -142,7 +144,7 @@ bool EMPre::initializeD(int seed,
       for (int i : snvIndices)
       {
         int ii = charToPreCluster[i];
-        int new_i = old2new[ii];
+        int new_i = old2newSNV[i];
         
         for (int t = 0; t < _scriptT[i].size(); ++t)
         {
@@ -175,6 +177,32 @@ bool EMPre::initializeD(int seed,
             _solD[j][p] = pILP->getD(p, j);
           }
         }
+        
+//        _solPi = DoubleVector(_k, 0);
+//        for (int i : snvIndices)
+//        {
+//          int ii = charToPreCluster[i];
+//          int new_i = old2newSNV[i];
+//          
+//          for (int i2 : _preClustering[ii])
+//          {
+//            for (int t = 0; t < _scriptT[i].size(); ++t)
+//            {
+//              for (int j = 0; j < _k; ++j)
+//              {
+//                _solY[i2][t][j] = pILP->getSolY()[new_i][t][j];
+//                _solPi[j] += _solY[i2][t][j];
+//              }
+//            }
+//          }
+//        }
+//        
+//        for (int j = 0; j < _k; ++j)
+//        {
+//          _solPi[j] /= n;
+//        }
+//        
+//        roundD();
        
         pILP = NULL;
       }
