@@ -208,44 +208,6 @@ void SoftClusterLpCplexPre::initConstraints()
     sum.clear();
   }
   
-//  for (int i = 0; i < n; ++i)
-//  {
-//    const int size_T_i = _scriptT[i].size();
-//
-//    DoubleVector f_i;
-//    for (int p = 0; p < m; ++p)
-//    {
-//      f_i.push_back(_R.getVAF(p, i));
-//    }
-//
-//    for (int t = 0; t < size_T_i; ++t)
-//    {
-//      StateTree TT = Solver::convertToStateTreeFromSNVF(_R, _scriptT[i][t], f_i, i);
-//      IntVector ccf, dcf;
-//
-//      bool ok = true;
-//      for (int p = 0; p < m; ++p)
-//      {
-//        ccf.push_back(TT.cf(p) * 100);
-//        dcf.push_back(TT.dcf(p) * 100);
-//
-//        if (ccf.back() < 0 || dcf.back() < 0 || ccf.back() > 100 || dcf.back() > 100)
-//        {
-//          ok = false;
-//          break;
-//        }
-//      }
-//
-//      if (!ok)
-//      {
-//        for (int j = 0; j < _k; ++j)
-//        {
-//          _model.add(_y[i][t][j] == 0);
-//        }
-//      }
-//    }
-//  }
-
   if (_includePi)
   {
     for (int j = 0; j < _k; ++j)

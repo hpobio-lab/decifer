@@ -139,6 +139,29 @@ bool EMPre::initializeD(int seed,
 //      std::unique_ptr<SoftClusterIlp> pILP = createSoftClusterIlpSolver(_R, _preClustering);
       pILP->init();
       
+      for (int i : snvIndices)
+      {
+        int ii = charToPreCluster[i];
+        int new_i = old2new[ii];
+        
+        for (int t = 0; t < _scriptT[i].size(); ++t)
+        {
+          for (int p = 0; p < m; ++p)
+          {
+            double dLB = 0;
+            double dUB = 1;
+            for (int i2 : _preClustering[ii])
+            {
+              dLB = std::max(dLB, _dLB[i2][t][p]);
+              dUB = std::min(dUB, _dUB[i2][t][p]);
+            }
+            
+            pILP->setDLB(new_i, t, p, dLB);
+            pILP->setDUB(new_i, t, p, dUB);
+          }
+        }
+      }
+      
       if (!pILP->solve(nrThreads, timeLimit, verbose, memoryLimit))
       {
         return false;

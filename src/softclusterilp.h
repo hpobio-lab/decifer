@@ -84,6 +84,42 @@ public:
   /// @param preClustering Pre clustering
   virtual void initPreClusteringConstraints(const IntMatrix& preClustering);
   
+  double getDLB(int i, int t, int p) const
+  {
+    assert(0 <= i && i < _R.getNrCharacters());
+    assert(0 <= t && t < _scriptT[i].size());
+    assert(0 <= p && p < _R.getNrSamples());
+    
+    return _dLB[i][t][p];
+  }
+  
+  double getDUB(int i, int t, int p) const
+  {
+    assert(0 <= i && i < _R.getNrCharacters());
+    assert(0 <= t && t < _scriptT[i].size());
+    assert(0 <= p && p < _R.getNrSamples());
+    
+    return _dUB[i][t][p];
+  }
+  
+  void setDLB(int i, int t, int p, double dLB)
+  {
+    assert(0 <= i && i < _R.getNrCharacters());
+    assert(0 <= t && t < _scriptT[i].size());
+    assert(0 <= p && p < _R.getNrSamples());
+    
+    _dLB[i][t][p] = dLB;
+  }
+  
+  void setDUB(int i, int t, int p, double dUB)
+  {
+    assert(0 <= i && i < _R.getNrCharacters());
+    assert(0 <= t && t < _scriptT[i].size());
+    assert(0 <= p && p < _R.getNrSamples());
+    
+    _dUB[i][t][p] = dUB;
+  }
+  
 protected:
   typedef std::vector<Double5Matrix> Double6Matrix;
   
