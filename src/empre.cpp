@@ -207,6 +207,7 @@ bool EMPre::solve(int restart,
       std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = " << ++step << " -- infeasible solution! (M)" << " -- " << timer.realTime() << " s" << std::endl;
       return false;
     }
+    roundD();
     
     delta = updateLogLikelihood();
     std::cerr << "k == " << _k << " -- Restart = " << restart << " -- Iteration = " << ++step

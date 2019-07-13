@@ -111,6 +111,30 @@ public:
   
   double getLogLikelihoodGamma() const;
   
+  double roundD()
+  {
+    const int n = _R.getNrCharacters();
+    const int m = _R.getNrSamples();
+    
+    for (int i = 0; i < n; ++i)
+    {
+      for (int t = 0; t < _scriptT[i].size(); ++t)
+      {
+        for (int j = 0; j < _k; ++j)
+        {
+          if (g_tol.nonZero(_solY[i][t][j]))
+          {
+            for (int p = 0; p < m; ++p)
+            {
+              _solD[j][p] = std::max(_dLB[i][t][p], _solD[j][p]);
+              _solD[j][p] = std::min(_dUB[i][t][p], _solD[j][p]);
+            }
+          }
+        }
+      }
+    }
+  }
+  
 protected:
   /// E step, estimate y and pi
   ///
