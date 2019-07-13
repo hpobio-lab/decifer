@@ -179,7 +179,7 @@ void EMCplexPre::initE()
             const int ref_ip = _R.getRef(p, i);
             
             const double likelihood = getLogLikelihood(var_ip, ref_ip, h);
-            if (likelihood < infeasible_log || isnan(likelihood) || _solD[j][p] < _dLB[i][t][p] || _solD[j][p] > _dUB[i][t][p])
+            if (likelihood < infeasible_log || isnan(likelihood) || g_tol.less(_solD[j][p], _dLB[i][t][p]) || g_tol.less(_dUB[i][t][p], _solD[j][p]))
             {
               if (feasible[ii][t][j])
               {
@@ -378,23 +378,6 @@ void EMCplexPre::initM()
       sum2.clear();
     }
   }
-  
-//  _modelM.add(_d[0][0] == 0.548387);
-//  _modelM.add(_d[0][1] == 0.516129);
-//  _modelM.add(_d[0][2] == 0.67);
-//  _modelM.add(_d[1][0] == 0.322581);
-//  _modelM.add(_d[1][1] == 0.0322581);
-//  _modelM.add(_d[1][2] == 0.612903);
-//  _modelM.add(_d[2][0] == 0.0322581);
-//  _modelM.add(_d[2][1] == 0.258065);
-//  _modelM.add(_d[2][2] == 0.0322581);
-//  _modelM.add(_d[3][0] == 0.0967742);
-//  _modelM.add(_d[3][1] == 0.0322581);
-//  _modelM.add(_d[3][2] == 0.0967742);
-//  _modelM.add(_d[4][0] == 0.258065);
-//  _modelM.add(_d[4][1] == 0.387097);
-//  _modelM.add(_d[4][2] == 0.387097);
-  
 
   IloExpr obj(_env);
   for (int i = 0; i < n; ++i)

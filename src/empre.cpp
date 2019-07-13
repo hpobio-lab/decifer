@@ -183,7 +183,7 @@ bool EMPre::initializeD(int seed,
 //        {
 //          int ii = charToPreCluster[i];
 //          int new_i = old2newSNV[i];
-//          
+//
 //          for (int i2 : _preClustering[ii])
 //          {
 //            for (int t = 0; t < _scriptT[i].size(); ++t)
@@ -196,12 +196,12 @@ bool EMPre::initializeD(int seed,
 //            }
 //          }
 //        }
-//        
+//
 //        for (int j = 0; j < _k; ++j)
 //        {
 //          _solPi[j] /= n;
 //        }
-//        
+//
 //        roundD();
        
         pILP = NULL;
@@ -455,11 +455,84 @@ void EMPre::init()
 {
   Solver::init();
   
+  const int m = _R.getNrSamples();
   const int n = _R.getNrCharacters();
   
   for (int i = 0; i < n; ++i)
   {
     _solY[i] = DoubleMatrix(_scriptT[i].size(), DoubleVector(_k, 1));
   }
+  
+//  for (int i = 0; i < n; ++i)
+//  {
+//    IntSet dominatingStateTrees;
+//    {
+//      Digraph G;
+//      IntNodeMap node2idx(G);
+//      DoubleVectorNodeMap node2dcfExp(G);
+//      for (int t = 0; t < _scriptT[i].size(); ++t)
+//      {
+//        Node v = G.addNode();
+//        node2idx[v] = t;
+//        node2dcfExp[v] = DoubleVector(m, 0);
+//        
+//        // compute dcfExp
+//        
+//        DoubleVector f_i;
+//        for (int p = 0; p < m; ++p)
+//        {
+//          f_i.push_back(_R.getVAF(p, i));
+//        }
+//        
+//        StateTree TT = Solver::convertToStateTreeFromSNVF(_R, _scriptT[i][t], f_i, i);
+//        for (int p = 0; p < m; ++p)
+//        {
+//          node2dcfExp[v][p] = TT.dcf(p);
+//        }
+//      }
+//      
+//      for (NodeIt v(G); v != lemon::INVALID; ++v)
+//      {
+//        bool dominating = true;
+//        for (NodeIt w(G); w != lemon::INVALID; ++w)
+//        {
+//          if (v == w)
+//            continue;
+//          
+//          bool edge = true;
+//          for (int p = 0; p < m; ++p)
+//          {
+//            edge &= g_tol.less(node2dcfExp[v][p], node2dcfExp[w][p]);
+//          }
+//          
+//          if (edge)
+//          {
+//            G.addArc(v, w);
+//            dominating = false;
+//          }
+//        }
+//        
+//        if (dominating)
+//        {
+//          dominatingStateTrees.insert(node2idx[v]);
+//        }
+//      }
+//    }
+//    
+//    //    std::cerr << "SNV precluster: " << ii << " -- number of state trees: "
+//    //              << dominatingStateTrees.size() << "/" << size_T_ii << std::endl;
+//    if (!dominatingStateTrees.empty())
+//    {
+//      for (int t = 0; t < _scriptT[i].size(); ++t)
+//      {
+//        if (dominatingStateTrees.count(t) == 0)
+//        {
+//          for (int j = 0; j < _k; ++j)
+//          {
+//            _solY[i][t][j] = 0;
+//          }
+//        }
+//      }
+//    }
+//  }
 }
-

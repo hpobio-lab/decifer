@@ -57,7 +57,7 @@ protected:
     return std::unique_ptr<SoftClusterIlp>(new SoftClusterLpCplexPre(R,
                                                                      preClustering,
                                                                      _k,
-                                                                     3,
+                                                                     log(_nrSegments) / log(2),
                                                                      _statType,
                                                                      _precisionBetaBin,
                                                                      _forceTruncal,

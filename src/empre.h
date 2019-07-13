@@ -111,7 +111,7 @@ public:
   
   double getLogLikelihoodGamma() const;
   
-  double roundD()
+  void roundD()
   {
     const int n = _R.getNrCharacters();
     const int m = _R.getNrSamples();
