@@ -516,13 +516,13 @@ double Solver::getLogLikelihood(int i) const
                        maxCopyNumber))
         {
           const double h = (_solD[j][p] - _numerator[i][t][p]) / _denominator[i][p];
-          assert(_denominator[i][p] != 0);
-          if (!((!(h <= 0 || !g_tol.nonZero(h)) || var_pi == 0) && (!(h >= 1 || g_tol.less(1, h)) || ref_pi == 0)))
-          {
-            prod = 0;
-            break;
-          }
-          else
+//          assert(_denominator[i][p] != 0);
+//          if (!((!(h <= 0 || !g_tol.nonZero(h)) || var_pi == 0) && (!(h >= 1 || g_tol.less(1, h)) || ref_pi == 0)))
+//          {
+//            prod = 0;
+//            break;
+//          }
+//          else
           {
             const double val = getLogLikelihood(var_pi, ref_pi, h);
             log_prod += val;
