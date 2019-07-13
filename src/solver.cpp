@@ -447,6 +447,15 @@ void Solver::init()
 
 double Solver::getLogLikelihood(int var, int ref, double f) const
 {
+  if (!g_tol.nonZero(f))
+  {
+    f = 1e-3;
+  }
+  if (!g_tol.different(1, f))
+  {
+    f = 1 - 1e-3;
+  }
+
   if (!g_tol.nonZero(f) && var == 0)
   {
     return 0;
