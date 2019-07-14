@@ -296,6 +296,15 @@ void EMCplexPre::initE()
     }
   }
   
+  if (_forceTruncal)
+  {
+    // cluster 0 has most SNVs
+    for (int j = 1; j < _k; ++j)
+    {
+      _modelE.add(_pi[j] <= _pi[0]);
+    }
+  }
+  
   _modelE.add(IloMaximize(_env, obj));
   obj.end();
   sum.end();
@@ -412,8 +421,6 @@ void EMCplexPre::initM()
       {
         _modelM.add(_d[j][p] <= _d[0][p]);
       }
-      // cluster 0 has most SNVs
-      _modelM.add(_pi[j] <= _pi[0]);
     }
   }
   
