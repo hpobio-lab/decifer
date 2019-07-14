@@ -412,6 +412,8 @@ void EMCplexPre::initM()
       {
         _modelM.add(_d[j][p] <= _d[0][p]);
       }
+      // cluster 0 has most SNVs
+      _modelM.add(_pi[j] <= _pi[0]);
     }
   }
   
