@@ -396,7 +396,7 @@ bool SoftClusterIlpCplex::solve(int nrThreads,
   
   IloFastMutex mutex;
 //  _cplex.use(IloCplex::Callback(new (_env) SoftClusterIlpCplexCallback<IloCplex::UserCutCallbackI>(_env, m, n, _k, _y, _yy, _yyd, _d, _dLB, _dUB, &mutex)));
-  _cplex.use(IloCplex::Callback(new (_env) SoftClusterIlpCplexCallback<IloCplex::LazyConstraintCallbackI>(_env, m, n, _k, _y, _yy, _yyd, _d, _dLB, _dUB, &mutex)));
+//  _cplex.use(IloCplex::Callback(new (_env) SoftClusterIlpCplexCallback<IloCplex::LazyConstraintCallbackI>(_env, m, n, _k, _y, _yy, _yyd, _d, _dLB, _dUB, &mutex)));
   
   try {
     _cplex.solve();
