@@ -45,7 +45,7 @@ bool PreClusterKMeans::solve(int nrRestarts,
     }
   }
   
-  std::uniform_real_distribution<int> dist(1, 1000000);
+  std::uniform_int_distribution<int> dist(1, 1000000);
   for (int restart = 0; restart < nrRestarts; ++restart)
   {
     auto res = dkm::kmeans_lloyd(data, _k, dist(g_rng));
