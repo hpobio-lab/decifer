@@ -45,9 +45,10 @@ bool PreClusterKMeans::solve(int nrRestarts,
     }
   }
   
+  std::uniform_real_distribution<int> dist(1, 1000000);
   for (int restart = 0; restart < nrRestarts; ++restart)
   {
-    auto res = dkm::kmeans_lloyd(data, _k, restart);
+    auto res = dkm::kmeans_lloyd(data, _k, dist(g_rng));
     
     double logLikelihood = 0;
     for (int i = 0; i < n; ++i)

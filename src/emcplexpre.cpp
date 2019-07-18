@@ -218,83 +218,83 @@ void EMCplexPre::initE()
     }
   }
   
-  for (int ii = 0; ii < nrPreClusters; ++ii)
-  {
-    assert(!_preClustering[ii].empty());
-    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
-    
-    IntSet dominatingStateTrees;
-    
-    for (int i : _preClustering[ii])
-    {
-      Digraph G;
-      IntNodeMap node2idx(G);
-      DoubleVectorNodeMap node2dcfExp(G);
-      for (int t = 0; t < size_T_ii; ++t)
-      {
-        Node v = G.addNode();
-        node2idx[v] = t;
-        node2dcfExp[v] = DoubleVector(m, 0);
-        
-        // compute dcfExp
-        
-        DoubleVector f_i;
-        for (int p = 0; p < m; ++p)
-        {
-          f_i.push_back(_R.getVAF(p, i));
-        }
-        
-        StateTree TT = Solver::convertToStateTreeFromSNVF(_R, _scriptT[i][t], f_i, i);
-        for (int p = 0; p < m; ++p)
-        {
-          node2dcfExp[v][p] = TT.dcf(p);
-        }
-      }
-      
-      for (NodeIt v(G); v != lemon::INVALID; ++v)
-      {
-        bool dominating = true;
-        for (NodeIt w(G); w != lemon::INVALID; ++w)
-        {
-          if (v == w)
-            continue;
-          
-          bool edge = true;
-          for (int p = 0; p < m; ++p)
-          {
-            edge &= g_tol.less(node2dcfExp[v][p], node2dcfExp[w][p]) && feasible[ii][node2idx[w]][p];
-          }
-          
-          if (edge)
-          {
-            G.addArc(v, w);
-            dominating = false;
-          }
-        }
-        
-        if (dominating)
-        {
-          dominatingStateTrees.insert(node2idx[v]);
-        }
-      }
-    }
-    
-//    std::cerr << "SNV precluster: " << ii << " -- number of state trees: "
-//              << dominatingStateTrees.size() << "/" << size_T_ii << std::endl;
-    if (!dominatingStateTrees.empty())
-    {
-      for (int t = 0; t < size_T_ii; ++t)
-      {
-        if (dominatingStateTrees.count(t) == 0)
-        {
-          for (int j = 0; j < _k; ++j)
-          {
-            _modelE.add(_y[ii][t][j] == 0);
-          }
-        }
-      }
-    }
-  }
+//  for (int ii = 0; ii < nrPreClusters; ++ii)
+//  {
+//    assert(!_preClustering[ii].empty());
+//    const int size_T_ii = _scriptT[_preClustering[ii].front()].size();
+//    
+//    IntSet dominatingStateTrees;
+//    
+//    for (int i : _preClustering[ii])
+//    {
+//      Digraph G;
+//      IntNodeMap node2idx(G);
+//      DoubleVectorNodeMap node2dcfExp(G);
+//      for (int t = 0; t < size_T_ii; ++t)
+//      {
+//        Node v = G.addNode();
+//        node2idx[v] = t;
+//        node2dcfExp[v] = DoubleVector(m, 0);
+//        
+//        // compute dcfExp
+//        
+//        DoubleVector f_i;
+//        for (int p = 0; p < m; ++p)
+//        {
+//          f_i.push_back(_R.getVAF(p, i));
+//        }
+//        
+//        StateTree TT = Solver::convertToStateTreeFromSNVF(_R, _scriptT[i][t], f_i, i);
+//        for (int p = 0; p < m; ++p)
+//        {
+//          node2dcfExp[v][p] = TT.dcf(p);
+//        }
+//      }
+//      
+//      for (NodeIt v(G); v != lemon::INVALID; ++v)
+//      {
+//        bool dominating = true;
+//        for (NodeIt w(G); w != lemon::INVALID; ++w)
+//        {
+//          if (v == w)
+//            continue;
+//          
+//          bool edge = true;
+//          for (int p = 0; p < m; ++p)
+//          {
+//            edge &= g_tol.less(node2dcfExp[v][p], node2dcfExp[w][p]) && feasible[ii][node2idx[w]][p];
+//          }
+//          
+//          if (edge)
+//          {
+//            G.addArc(v, w);
+//            dominating = false;
+//          }
+//        }
+//        
+//        if (dominating)
+//        {
+//          dominatingStateTrees.insert(node2idx[v]);
+//        }
+//      }
+//    }
+//    
+////    std::cerr << "SNV precluster: " << ii << " -- number of state trees: "
+////              << dominatingStateTrees.size() << "/" << size_T_ii << std::endl;
+//    if (!dominatingStateTrees.empty())
+//    {
+//      for (int t = 0; t < size_T_ii; ++t)
+//      {
+//        if (dominatingStateTrees.count(t) == 0)
+//        {
+//          for (int j = 0; j < _k; ++j)
+//          {
+//            _modelE.add(_y[ii][t][j] == 0);
+//          }
+//        }
+//      }
+//    }
+//  }
   
   if (_forceTruncal)
   {
